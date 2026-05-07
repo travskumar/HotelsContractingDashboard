@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel Contracting Intelligence Dashboard v7</title>
+  <style>
+    :root{
+      --bg:#07111f; --panel:#0d1b2e; --panel2:#10233a; --card:#0f243b; --muted:#8fa3bd; --text:#edf5ff;
+      --blue:#2f80ed; --cyan:#27d6c4; --yellow:#ffd23f; --orange:#ff9f1c; --red:#ff5d73; --green:#38d39f; --purple:#9d7cff;
+      --line:rgba(255,255,255,.09); --soft:rgba(255,255,255,.055); --shadow:0 20px 70px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top left, rgba(47,128,237,.22), transparent 34%),linear-gradient(180deg,#07111f,#091320 45%,#07111f);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+    .wrap{max-width:1580px;margin:0 auto;padding:28px}.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.eyebrow{color:var(--yellow);text-transform:uppercase;letter-spacing:.18em;font-weight:800;font-size:11px}.title{font-size:34px;line-height:1.05;margin:7px 0 6px;font-weight:850;letter-spacing:-.04em}.subtitle{color:var(--muted);font-size:14px;line-height:1.6;max-width:880px}
+    .btn{border:1px solid var(--line);background:var(--soft);color:var(--text);border-radius:12px;padding:10px 14px;font-weight:750;font-size:12px;cursor:pointer}.btn:hover{border-color:rgba(47,128,237,.7);background:rgba(47,128,237,.13)}.btn.primary{background:linear-gradient(135deg,var(--blue),#165ecb);border-color:rgba(47,128,237,.8)}.btn.yellow{color:#08111d;background:linear-gradient(135deg,var(--yellow),#f5a900);border:0}
+    .upload{border:1px dashed rgba(255,255,255,.22);background:rgba(255,255,255,.035);padding:26px;border-radius:22px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center;margin:18px 0 22px}.upload h2{margin:0 0 8px;font-size:20px}.upload p{color:var(--muted);line-height:1.55;margin:0}.uploadActions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.hidden{display:none!important}
+    .grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(6,minmax(150px,1fr));margin:16px 0}.card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 32px rgba(0,0,0,.18)}.kpiLabel{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.kpiVal{font-size:28px;font-weight:850;margin-top:6px;letter-spacing:-.03em}.kpiSub{color:var(--muted);font-size:12px;margin-top:4px}
+    .controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:16px 0}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);padding:9px 13px;border-radius:999px;font-weight:800;font-size:12px;cursor:pointer}.tab.active{color:var(--text);border-color:rgba(47,128,237,.8);background:rgba(47,128,237,.18)}.filters{display:flex;gap:8px;flex-wrap:wrap}select,input{background:#0b1a2b;border:1px solid var(--line);border-radius:11px;color:var(--text);padding:9px 11px;font-size:12px;outline:none;min-height:38px}.search{min-width:240px}
+    .analyticsGrid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin:14px 0}.chartHeader{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap}.chartTitle{font-size:14px;font-weight:900}.chartSub{color:var(--muted);font-size:12px;margin-top:3px}.miniControls{display:flex;gap:8px;flex-wrap:wrap}.chartBox{height:286px;position:relative}.svgChart{width:100%;height:100%;overflow:visible}.axisText{fill:#8fa3bd;font-size:10px}.gridLine{stroke:rgba(255,255,255,.08);stroke-width:1}.linePath{fill:none;stroke:var(--cyan);stroke-width:3}.dot{fill:var(--yellow);stroke:#07111f;stroke-width:2}.barRow{display:grid;grid-template-columns:165px 1fr 84px;gap:10px;align-items:center;margin:10px 0}.barLabel{font-weight:850;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.barMeta{color:var(--muted);font-size:10px;margin-top:2px}.hbar{height:22px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;display:flex}.seg{height:100%;display:flex;align-items:center;justify-content:center;min-width:2px;font-size:9px;font-weight:900;color:#07111f}.seg span{filter:drop-shadow(0 1px 1px rgba(255,255,255,.35))}.barValue{text-align:right;font-size:11px;color:var(--muted);font-weight:750}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.legendItem{display:flex;gap:5px;align-items:center;font-size:10px;color:var(--muted)}.swatch{width:10px;height:10px;border-radius:3px}.mathBox{background:rgba(255,210,63,.08);border:1px solid rgba(255,210,63,.18);border-radius:15px;padding:13px;color:#ffe68a;font-size:12px;line-height:1.55}.mathLine{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(0,0,0,.18);padding:8px;border-radius:10px;margin-top:8px;color:#fff2aa;overflow:auto}.layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px}.tableCard{overflow:hidden;padding:0}.tableTop{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);gap:12px}.tableTop strong{font-size:14px}.tableTop span{color:var(--muted);font-size:12px}.tableWrap{overflow:auto;max-height:680px}table{width:100%;border-collapse:separate;border-spacing:0}th{position:sticky;top:0;z-index:2;background:#0b1a2b;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;text-align:right;padding:12px 10px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}th:first-child,td:first-child{text-align:left}td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.055);font-size:12px;text-align:right;white-space:nowrap}tr:hover td{background:rgba(47,128,237,.08)}.nameCell{max-width:320px;white-space:normal}.mainName{font-weight:850;font-size:13px}.subName{color:var(--muted);font-size:11px;margin-top:3px}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;font-weight:800;font-size:11px}.pill.green{background:rgba(56,211,159,.13);color:var(--green)}.pill.yellow{background:rgba(255,210,63,.13);color:var(--yellow)}.pill.red{background:rgba(255,93,115,.13);color:var(--red)}.bar{height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;min-width:76px}.bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--cyan))}.score{display:flex;justify-content:flex-end;align-items:center;gap:8px}.side{display:flex;flex-direction:column;gap:14px}.side h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--yellow)}.rankItem{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;margin:10px 0}.rankNo{width:24px;height:24px;border-radius:9px;background:rgba(47,128,237,.16);display:flex;align-items:center;justify-content:center;font-weight:900;color:#84b6ff}.rankName{font-size:12px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rankMeta{font-size:10px;color:var(--muted);margin-top:2px}.rankVal{font-size:12px;font-weight:900}.quality{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.q{border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.035)}.q b{display:block;font-size:18px}.q span{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:850}.stars{color:var(--yellow);letter-spacing:1px}.danger{color:var(--red)}.good{color:var(--green)}.warn{color:var(--yellow)}.empty{padding:56px;text-align:center;color:var(--muted)}.footerNote{color:var(--muted);font-size:11px;line-height:1.6;margin-top:12px}.detail{position:fixed;inset:0 0 0 auto;width:min(480px,94vw);background:#091727;border-left:1px solid var(--line);z-index:10;box-shadow:-20px 0 80px rgba(0,0,0,.55);transform:translateX(105%);transition:.22s ease;overflow:auto}.detail.open{transform:translateX(0)}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:9}.detailHead{padding:22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px}.detailTitle{font-size:22px;font-weight:900;line-height:1.15}.detailBody{padding:18px 22px}.metricGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.miniMetric{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:15px;padding:12px}.miniMetric b{display:block;font-size:20px;margin-top:4px}.section{margin:18px 0}.sectionTitle{color:var(--yellow);font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:900;margin-bottom:9px}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:#cfe0f5;font-weight:750;font-size:11px}.smallTable th,.smallTable td{position:static;font-size:11px;padding:8px 8px}.smallTable th{text-align:right}.smallTable th:first-child,.smallTable td:first-child{text-align:left}.note{font-size:11px;color:var(--muted);line-height:1.55}
+
+    /* v3 full-page detail workspace: row click opens a proper analysis page, not a side card */
+    .detail{position:fixed;inset:0;width:100vw;max-width:none;background:linear-gradient(180deg,#07111f,#091727 55%,#07111f);border-left:0;z-index:20;box-shadow:none;transform:translateY(105%);transition:.22s ease;overflow:auto}.detail.open{transform:translateY(0)}.overlay{display:none!important}.detailHead{position:sticky;top:0;z-index:25;padding:20px 32px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;background:rgba(7,17,31,.92);backdrop-filter:blur(14px)}.detailTitle{font-size:32px;font-weight:900;line-height:1.05;letter-spacing:-.04em}.detailBody{padding:24px 32px;max-width:1580px;margin:0 auto}.detailKpiGrid{display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:14px;margin-bottom:16px}.detailMainGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(380px,.8fr);gap:14px;margin:14px 0}.detailTwoGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}.bigChartBox{height:390px;position:relative}.detailBarRow{display:grid;grid-template-columns:210px 1fr 90px;gap:12px;align-items:center;margin:12px 0}.supplierStackBig{height:46px;border-radius:16px;background:rgba(255,255,255,.07);overflow:hidden;display:flex}.supplierStackBig .seg{font-size:12px;color:#07111f}.supplierTable{max-height:360px;overflow:auto;margin-top:12px}.detailClose{min-width:92px}.detailSectionIntro{color:var(--muted);font-size:12px;line-height:1.55;margin-top:4px}.wideCard{min-height:100%}.detailNav{position:sticky;top:93px;z-index:24;display:flex;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;padding:10px 0;background:rgba(7,17,31,.88);backdrop-filter:blur(12px)}.detailTab{border:1px solid var(--line);background:rgba(255,255,255,.045);color:var(--muted);border-radius:999px;padding:10px 14px;font-weight:900;font-size:12px;cursor:pointer}.detailTab.active{background:rgba(47,128,237,.20);border-color:rgba(47,128,237,.85);color:var(--text)}.detailPane{display:none}.detailPane.active{display:block}.scoreStrip{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px;margin-bottom:14px}.seasonGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.seasonMonth{display:grid;grid-template-columns:64px 1fr 82px;gap:10px;align-items:center;margin:10px 0}.sectionHint{color:var(--muted);font-size:12px;line-height:1.55}.compactCard{max-height:680px;overflow:auto}
+
+    @media(max-width:1220px){.analyticsGrid,.layout,.detailMainGrid,.detailTwoGrid,.seasonGrid{grid-template-columns:1fr}.kpis,.detailKpiGrid,.scoreStrip{grid-template-columns:repeat(3,1fr)}.side{display:grid;grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){.wrap{padding:18px}.header{display:block}.title{font-size:28px}.upload{grid-template-columns:1fr}.uploadActions{justify-content:flex-start}.kpis,.detailKpiGrid,.scoreStrip{grid-template-columns:repeat(2,1fr)}.side{display:flex}.filters select,.search{width:100%;min-width:0}.quality{grid-template-columns:repeat(2,1fr)}.barRow,.detailBarRow{grid-template-columns:1fr}.barValue{text-align:left}.detailBody{padding:16px}.detailHead{padding:16px}.detailTitle{font-size:24px}}
+    /* Supplier mix full-width bar rows */
+    .supMixRow{display:grid;grid-template-columns:200px 1fr 52px;gap:14px;align-items:center;margin:11px 0}
+    .supMixHbar{height:30px;border-radius:10px;background:rgba(255,255,255,.07);overflow:hidden;display:flex}
+    .supMixHbar .seg{height:100%;display:flex;align-items:center;justify-content:center;min-width:1px;font-size:10px;font-weight:900;color:#07111f;white-space:nowrap;overflow:hidden}
+    .supMixHbar .seg span{filter:drop-shadow(0 1px 1px rgba(255,255,255,.3));padding:0 3px}
+    .threeGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0}
+    .scatterDot{cursor:pointer;transition:r .1s}
+    .scatterDot:hover{stroke:#fff;stroke-width:2}
+    .ltBucket{display:grid;grid-template-columns:90px 1fr 70px 70px;gap:10px;align-items:center;margin:9px 0}
+    .ltLabel{font-size:12px;font-weight:850;color:var(--text)}
+    .ltMeta{font-size:10px;color:var(--muted);margin-top:2px}
+    .yoyLine1{fill:none;stroke:var(--cyan);stroke-width:2.5}
+    .yoyLine2{fill:none;stroke:var(--yellow);stroke-width:2.5;stroke-dasharray:6 3}
+    .yoyDot1{fill:var(--cyan);stroke:#07111f;stroke-width:2}
+    .yoyDot2{fill:var(--yellow);stroke:#07111f;stroke-width:2}
+    .scoreNote{font-size:10px;color:var(--orange);margin-top:6px;font-style:italic}
+    .warnPill{background:rgba(255,159,28,.13);color:var(--orange);display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:800}
+    @media(max-width:1220px){.threeGrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div>
+      <div class="eyebrow">TravClan Hotels · Contracting Intelligence v7</div>
+      <h1 class="title">Find where demand is strong enough to negotiate.</h1>
+      <div class="subtitle">Upload booking-level hotel data and rank chains, brands, hotels, destinations and suppliers. v7 adds YoY comparison chart, lead-time distribution, supplier concentration scatter, fixed projection denominator (data start → max, not Jan 1), relative-score note, and clearer supplier fragmentation labelling.</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button class="btn" id="resetBtn">Reset</button>
+      <button class="btn yellow" id="exportBtn">Export Current View</button>
+    </div>
+  </div>
+
+  <div class="upload" id="uploadBox">
+    <div>
+      <h2>Upload booking file</h2>
+      <p>Works with your sample format: booking_date, hotel_id, country, city, hotel_name, checkIn, checkOut, numberOfRoom, supplier name, boardBasis, isRefundable, ChainName, BrandName, Agency State and Agency City.</p>
+      <div class="footerNote">Booking status filter auto-detects columns like booking_status, status, Booking Status or bookingStatus. If absent, the dashboard shows this clearly.</div>
+    </div>
+    <div class="uploadActions">
+      <input type="file" id="fileInput" accept=".csv,.tsv,.txt" hidden />
+      <button class="btn primary" id="uploadBtn">Choose File</button>
+      <button class="btn" id="pasteBtn">Paste Data</button>
+    </div>
+  </div>
+
+  <textarea id="pasteArea" class="hidden" placeholder="Paste your tab-separated booking data here, including header row" style="width:100%;height:170px;margin-bottom:12px;border-radius:16px;padding:14px;background:#0b1a2b;color:var(--text);border:1px solid var(--line)"></textarea>
+  <div id="pasteActions" class="hidden" style="margin-bottom:18px;display:flex;gap:8px"><button class="btn primary" id="loadPastedBtn">Load Pasted Data</button><button class="btn" id="cancelPasteBtn">Cancel</button></div>
+
+  <div id="dashboard" class="hidden">
+    <div class="grid kpis" id="kpiGrid"></div>
+
+    <div class="controls">
+      <div class="tabs" id="tabs"></div>
+      <div class="filters">
+        <select id="countryFilter"></select>
+        <select id="cityFilter"></select>
+        <select id="starFilter"></select>
+        <select id="propertyFilter"></select>
+        <select id="supplierFilter"></select>
+        <select id="statusFilter"></select>
+        <input id="searchInput" class="search" placeholder="Search chain / hotel / supplier" />
+      </div>
+    </div>
+
+    <div class="analyticsGrid">
+      <div class="card">
+        <div class="chartHeader">
+          <div><div class="chartTitle">Trend Analysis</div><div class="chartSub" id="trendSub">Monthly / quarterly / yearly trend from filtered bookings.</div></div>
+          <div class="miniControls">
+            <select id="trendPeriod"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select>
+            <select id="trendMetric"><option value="bookings">Bookings</option><option value="roomNights">Room Nights</option><option value="los">Avg LOS</option><option value="hotels">Unique Hotels</option></select>
+          </div>
+        </div>
+        <div class="chartBox"><svg id="trendSvg" class="svgChart"></svg></div>
+      </div>
+      <div class="card">
+        <div class="chartHeader">
+          <div><div class="chartTitle">Projection for Year</div><div class="chartSub">Run-rate projection based on selected filters.</div></div>
+          <div class="miniControls"><select id="projectionYear"></select><select id="projectionMetric"><option value="bookings">Bookings</option><option value="roomNights">Room Nights</option></select></div>
+        </div>
+        <div id="projectionBox" class="mathBox"></div>
+      </div>
+    </div>
+
+    <div class="analyticsGrid">
+      <div class="card" style="grid-column:1/-1">
+        <div class="chartHeader">
+          <div><div class="chartTitle">Agency State Distribution</div><div class="chartSub">Bookings, room nights and average LOS by agency state.</div></div>
+          <div class="miniControls"><select id="agencySort"><option value="bookings">Sort by Bookings</option><option value="roomNights">Sort by Room Nights</option><option value="los">Sort by Avg LOS</option></select></div>
+        </div>
+        <div id="agencyStateBox"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin:14px 0">
+      <div class="chartHeader">
+        <div><div class="chartTitle">Supplier Mix by Chain</div><div class="chartSub">Horizontal stacked bars showing each chain's supplier split. Wider bars = more room to see individual supplier share. Hover segments for exact %.</div></div>
+        <div class="miniControls"><select id="supplierMixMetric"><option value="bookings">% of Bookings</option><option value="roomNights">% of Room Nights</option><option value="losWeighted">% of LOS-weighted Volume</option></select><select id="supplierMixTop"><option value="8">Top 8 Chains</option><option value="12">Top 12 Chains</option><option value="20">Top 20 Chains</option></select></div>
+      </div>
+      <div id="supplierMixBox"></div>
+    </div>
+
+    <div class="layout">
+      <div class="card tableCard">
+        <div class="tableTop"><div><strong id="tableTitle"></strong><br><span id="tableSub"></span></div><span id="rowLimitNote"></span></div>
+        <div class="tableWrap"><table id="mainTable"></table><div id="empty" class="empty hidden">No results match your filters.</div></div>
+      </div>
+      <div class="side">
+        <div class="card"><h3>Top Opportunities</h3><div id="topOpp"></div></div>
+        <div class="card"><h3>Data Quality</h3><div id="qualityBox" class="quality"></div><div class="footerNote" id="statusNote"></div></div>
+        <div class="card"><h3>Score Formula</h3><div class="note">Contracting score is directional: 28% booking volume + 26% room nights + 16% month spread + 12% agency city spread + 10% supplier consolidation opportunity + 5% refundability opportunity + 3% hotel breadth.</div><div class="scoreNote">⚠ Scores are relative to the current filtered dataset — not fixed benchmarks. A score of 80 after filtering to one country is not comparable to 80 in the full dataset. Higher supplier count = higher consolidation opportunity score.</div></div>
+      </div>
+    </div>
+
+    <!-- NEW v7: YoY Comparison + Lead Time Distribution -->
+    <div class="analyticsGrid" style="margin-top:14px">
+      <div class="card">
+        <div class="chartHeader">
+          <div><div class="chartTitle">Year-over-Year Comparison</div><div class="chartSub" id="yoySub">Compare two years on the same monthly axis to spot growth/decline patterns.</div></div>
+          <div class="miniControls">
+            <select id="yoyYear1"></select>
+            <select id="yoyYear2"></select>
+            <select id="yoyMetric"><option value="bookings">Bookings</option><option value="roomNights">Room Nights</option><option value="los">Avg LOS</option></select>
+          </div>
+        </div>
+        <div class="chartBox"><svg id="yoySvg" class="svgChart"></svg></div>
+        <div class="legend" id="yoyLegend"></div>
+      </div>
+      <div class="card">
+        <div class="chartHeader">
+          <div><div class="chartTitle">Lead Time Distribution</div><div class="chartSub">Days between booking_date and check-in, bucketed. Critical for rate structure decisions: last-minute vs. advance allotment contracting.</div></div>
+          <div class="miniControls"><select id="ltMetric"><option value="bookings">By Bookings</option><option value="roomNights">By Room Nights</option></select></div>
+        </div>
+        <div id="leadTimeBox"></div>
+      </div>
+    </div>
+
+    <!-- NEW v7: Supplier Concentration Scatter -->
+    <div class="card" style="margin:14px 0">
+      <div class="chartHeader">
+        <div><div class="chartTitle">Supplier Concentration Scatter</div><div class="chartSub">X = Total Bookings · Y = Number of Suppliers · Dot size = Room Nights. Top-right quadrant (high volume, many suppliers) = urgent consolidation opportunity. Hover for details.</div></div>
+        <div class="miniControls"><select id="scatterView"><option value="chain">By Chain</option><option value="destination">By Destination</option><option value="brand">By Brand</option></select></div>
+      </div>
+      <div style="height:360px;position:relative"><svg id="scatterSvg" class="svgChart" style="width:100%;height:100%;overflow:visible"></svg></div>
+    </div>
+  </div>
+</div>
+<div id="detailOverlay" class="overlay hidden"></div>
+<div id="detail" class="detail"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const clean=v=>String(v??'').replace(/Â/g,'').trim();
+const toNum=(v,d=0)=>{const n=Number(String(v??'').replace(/,/g,''));return Number.isFinite(n)?n:d};
+const fmt=n=>Number(n||0).toLocaleString('en-IN');
+const pct=n=>(Number(n||0)).toFixed(1).replace('.0','')+'%';
+
+/* Normalise any common date string to a JS Date.
+   Handles: YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, MM/DD/YYYY (US), ISO with time */
+function parseFlexDate(v){
+  if(!v) return null;
+  const s=String(v).trim();
+  if(!s) return null;
+  /* YYYY-MM-DD or YYYY/MM/DD */
+  let m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  /* DD-MM-YYYY or DD/MM/YYYY */
+  m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if(m){
+    /* If first part > 12 it must be DD */
+    if(+m[1]>12) return new Date(+m[3], +m[2]-1, +m[1]);
+    /* Otherwise assume DD-MM-YYYY (Indian convention) */
+    return new Date(+m[3], +m[2]-1, +m[1]);
+  }
+  /* Fallback: let the engine try */
+  const d=new Date(s);
+  return isNaN(d)?null:d;
+}
+function pad2(n){return String(n).padStart(2,'0');}
+function dateToISO(d){return d?`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`:''}
+
+const daysBetween=(a,b)=>{const da=parseFlexDate(a),db=parseFlexDate(b);if(!da||!db)return 1;return Math.max(1,Math.round((db-da)/86400000)+1)};
+const nights=(ci,co)=>{const da=parseFlexDate(ci),db=parseFlexDate(co);if(!da||!db)return 1;const d=Math.round((db-da)/86400000);return d>0?d:1};
+const monthOf=d=>{const dt=parseFlexDate(d);return dt?`${dt.getFullYear()}-${pad2(dt.getMonth()+1)}`:'Unknown'};
+const yearOf=d=>{const dt=parseFlexDate(d);return dt&&Number.isFinite(dt.getFullYear())?dt.getFullYear():null};
+const quarterOf=d=>{const dt=parseFlexDate(d);if(!dt)return 'Unknown';return dt.getFullYear()+'-Q'+(Math.floor(dt.getMonth()/3)+1)};
+const daysInYear=y=>((y%4===0&&y%100!==0)||y%400===0)?366:365;
+const valid=v=>{v=clean(v);return v && v!=='0' && v.toLowerCase()!=='independent'?v:''};
+const palette=['#2f80ed','#27d6c4','#ffd23f','#ff9f1c','#9d7cff','#38d39f','#ff5d73','#80a6ff','#c0f255','#ffb7d5','#60e6ff','#f8e16c'];
+const statusCandidates=['booking_status','Booking Status','status','Status','bookingStatus','BookingStatus','booking_state','Booking State','bookingStatusName','Booking Status Name'];
+const dateCandidates=['booking_date','Booking Date','bookingDate','BookingDate','booking_dt','created_at','CreatedAt'];
+let rawRows=[],processed=null,activeView='chain',sortKey='opportunityScore',sortDir='desc',statusCol=null,dateCol=null,currentDetailItem=null;
+let _renderTimer=null,_cachedRows=null,_cachedRowsFilters=null;
+const views=[['chain','By Chain'],['brand','By Brand'],['hotel','By Hotel'],['destination','By Destination'],['supplier','By Supplier']];
+
+function splitLine(line,delim){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; } else if(ch===delim&&!q){ out.push(cur);cur=''; } else cur+=ch; } out.push(cur); return out; }
+function detectDelim(text){ const first=(text.split(/\r?\n/).find(l=>l.trim())||''); const tabs=(first.match(/\t/g)||[]).length, commas=(first.match(/,/g)||[]).length; return tabs>=commas?'\t':','; }
+function parseData(text){ const delim=detectDelim(text); const lines=text.split(/\r?\n/).filter(l=>l.trim()); if(!lines.length)return[]; const rawHeaders=splitLine(lines[0],delim).map(h=>clean(h)); return lines.slice(1).map(line=>{ const vals=splitLine(line,delim); const o={}; rawHeaders.forEach((h,i)=>{ o[h]=clean(vals[i]); }); return o; }).filter(o=>Object.values(o).some(Boolean)); }
+function boardType(row){ try{ const b=JSON.parse(row.boardBasis||'{}'); return clean(b.type||b.description||'RoomOnly')||'RoomOnly'; }catch(e){ return clean(row.boardBasis)||'RoomOnly'; } }
+function getStatus(row){ return statusCol ? clean(row[statusCol]) || 'Blank Status' : 'No Status Column'; }
+function rowMetric(row,metric){ const rn=nights(row.checkIn,row.checkOut)*(parseInt(row.numberOfRoom)||1); if(metric==='bookings')return 1; if(metric==='roomNights')return rn; if(metric==='losWeighted')return rn; return 1; }
+function add(map,key,row,extra={},getDate=r=>clean(r.booking_date||'')){ if(!map[key]) map[key]={key,displayName:key,type:'',bookings:0,roomNights:0,hotels:new Set(),hotelNames:new Set(),chains:new Set(),brands:new Set(),countries:new Set(),states:new Set(),cities:new Set(),suppliers:new Set(),months:new Set(),stars:[],propertyTypes:new Set(),agencyStates:new Set(),agencyCities:new Set(),statusSet:new Set(),refundable:0,nonRefundable:0,board:{},sampleRows:[],...extra}; const m=map[key]; const rn=nights(row.checkIn,row.checkOut)*(parseInt(row.numberOfRoom)||1); m.bookings++; m.roomNights+=rn; m.hotels.add(clean(row.hotel_id)||clean(row.hotel_name)); m.hotelNames.add(clean(row.hotel_name)); m.chains.add(valid(row.ChainName)||'Independent'); m.brands.add(valid(row.BrandName)||'Unbranded'); m.countries.add(clean(row.country)||'Unknown'); m.states.add(clean(row.state)||'Unknown'); m.cities.add(clean(row.city)||'Unknown'); m.suppliers.add(clean(row.name)||'Unknown'); m.months.add(monthOf(getDate(row))); m.stars.push(toNum(row['Star Rating'],0)); m.propertyTypes.add(clean(row.PropertyType)||'Unknown'); m.agencyStates.add(clean(row['Agency State'])||'Unknown'); m.agencyCities.add(clean(row['Agency City'])||'Unknown'); m.statusSet.add(getStatus(row)); if(clean(row.isRefundable)==='1')m.refundable++; else m.nonRefundable++; const bt=boardType(row); m.board[bt]=(m.board[bt]||0)+1; if(m.sampleRows.length<5)m.sampleRows.push(row); }
+function finalize(arr){ const max={bookings:Math.max(1,...arr.map(x=>x.bookings)),rn:Math.max(1,...arr.map(x=>x.roomNights)),months:Math.max(1,...arr.map(x=>x.months.size)),agency:Math.max(1,...arr.map(x=>x.agencyCities.size)),supplier:Math.max(1,...arr.map(x=>x.suppliers.size)),hotel:Math.max(1,...arr.map(x=>x.hotels.size))}; return arr.map(m=>{ const refundableRate=m.bookings?m.refundable/m.bookings*100:0; const avgStar=m.stars.length?m.stars.reduce((a,b)=>a+b,0)/m.stars.length:0; const volume=100*m.bookings/max.bookings, rn=100*m.roomNights/max.rn, consistency=100*m.months.size/max.months, breadth=100*m.agencyCities.size/max.agency, supplierFrag=100*m.suppliers.size/max.supplier, hotelBreadth=100*m.hotels.size/max.hotel, refundOpp=100-refundableRate; const opportunityScore=Math.round(volume*.28+rn*.26+consistency*.16+breadth*.12+supplierFrag*.10+refundOpp*.05+hotelBreadth*.03); return {...m,hotelCount:m.hotels.size,countryCount:m.countries.size,cityCount:m.cities.size,supplierCount:m.suppliers.size,monthSpread:m.months.size,agencyStateCount:m.agencyStates.size,agencyCityCount:m.agencyCities.size,refundableRate:Math.round(refundableRate),avgStar:+avgStar.toFixed(1),topBoard:Object.entries(m.board).sort((a,b)=>b[1]-a[1])[0]?.[0]||'Unknown',opportunityScore,refundOpp:Math.round(refundOpp),avgLOS:+(m.roomNights/Math.max(1,m.bookings)).toFixed(1)}; }); }
+function process(rows){ statusCol=null; dateCol=null; const headers=Object.keys(rows[0]||{});
+ for(const c of statusCandidates){ if(headers.includes(c)){statusCol=c;break;} }
+ for(const c of dateCandidates){ if(headers.includes(c)){dateCol=c;break;} }
+ if(!dateCol){ const lc=headers.find(h=>h.toLowerCase().includes('date')&&h.toLowerCase().includes('book')); if(lc)dateCol=lc; }
+ if(!dateCol){ const lc=headers.find(h=>h.toLowerCase().includes('date')); if(lc)dateCol=lc; }
+ const getDate=row=>clean(row[dateCol]||'');
+ const isRealDate=v=>{ if(!v||String(v).length<6)return false; const d=parseFlexDate(v); return d&&!isNaN(d.getTime())&&d.getFullYear()>2000&&d.getFullYear()<2100; };
+ const maps={chain:{},brand:{},hotel:{},destination:{},supplier:{}}; const sets={countries:new Set(),cities:new Set(),stars:new Set(),props:new Set(),suppliers:new Set(),statuses:new Set(),years:new Set()};
+ rows.forEach(row=>{ const chain=valid(row.ChainName)||'Independent', brand=valid(row.BrandName)||'Unbranded', hotel=clean(row.hotel_name)||'Unknown Hotel', hotelId=clean(row.hotel_id)||hotel, country=clean(row.country)||'Unknown', city=clean(row.city)||'Unknown', star=clean(row['Star Rating'])||'Unknown', prop=clean(row.PropertyType)||'Unknown', supplier=clean(row.name)||'Unknown', status=getStatus(row), y=yearOf(getDate(row)); sets.countries.add(country); sets.cities.add(city); sets.stars.add(star); sets.props.add(prop); sets.suppliers.add(supplier); sets.statuses.add(status); if(y)sets.years.add(String(y)); add(maps.chain,chain,row,{displayName:chain,type:'Chain'},getDate); add(maps.brand,brand,row,{displayName:brand,type:'Brand'},getDate); add(maps.hotel,`${hotelId}|${hotel}`,row,{displayName:hotel,type:'Hotel',hotelId,city,country,star,chain,brand},getDate); add(maps.destination,`${country}|${city}`,row,{displayName:`${city}, ${country}`,type:'Destination',city,country},getDate); add(maps.supplier,supplier,row,{displayName:supplier,type:'Supplier'},getDate); });
+ const out={}; Object.keys(maps).forEach(k=>out[k]=finalize(Object.values(maps[k]))); out.filters={countries:['All',...Array.from(sets.countries).sort()],cities:['All',...Array.from(sets.cities).sort()],stars:['All',...Array.from(sets.stars).sort((a,b)=>toNum(a)-toNum(b))],props:['All',...Array.from(sets.props).sort()],suppliers:['All',...Array.from(sets.suppliers).sort()],statuses:['All',...Array.from(sets.statuses).sort()],years:Array.from(sets.years).sort()}; out.totalBookings=rows.length; out.totalRoomNights=rows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0); out.uniqueHotels=new Set(rows.map(r=>clean(r.hotel_id)||clean(r.hotel_name))).size; out.uniqueChains=out.chain.length; out.uniqueCities=sets.cities.size; out.refRate=Math.round(rows.filter(r=>clean(r.isRefundable)==='1').length/Math.max(1,rows.length)*100);
+ const ds=rows.map(r=>({raw:getDate(r),ts:parseFlexDate(getDate(r))?.getTime()||0})).filter(x=>isRealDate(x.raw)).sort((a,b)=>a.ts-b.ts);
+ out.dateMin=ds.length?dateToISO(new Date(ds[0].ts)):''; out.dateMax=ds.length?dateToISO(new Date(ds[ds.length-1].ts)):''; out.dateCol=dateCol; return out; }
+function passGlobalFilters(row){ const cf=$('countryFilter').value, city=$('cityFilter').value, sf=$('starFilter').value, pf=$('propertyFilter').value, sup=$('supplierFilter').value, st=$('statusFilter').value; return (cf==='All'||clean(row.country)===cf) && (city==='All'||clean(row.city)===city) && (sf==='All'||String(clean(row['Star Rating']))===String(sf)) && (pf==='All'||clean(row.PropertyType)===pf) && (sup==='All'||clean(row.name)===sup) && (st==='All'||getStatus(row)===st); }
+function filteredRows(){ return rawRows.filter(passGlobalFilters); }
+function filteredRowsCached(){ if(_cachedRows)return _cachedRows; _cachedRows=filteredRows(); return _cachedRows; }
+function filtered(){ let list=[...processed[activeView]]; const cf=$('countryFilter').value, city=$('cityFilter').value, sf=$('starFilter').value, pf=$('propertyFilter').value, sup=$('supplierFilter').value, st=$('statusFilter').value, q=$('searchInput').value.toLowerCase().trim(); list=list.filter(r=>(cf==='All'||r.countries.has(cf)||r.country===cf)&&(city==='All'||r.cities.has(city)||r.city===city)&&(sf==='All'||String(Math.round(r.avgStar))===String(sf)||String(r.star)===String(sf))&&(pf==='All'||r.propertyTypes.has(pf))&&(sup==='All'||r.suppliers.has(sup)||r.displayName===sup)&&(st==='All'||r.statusSet.has(st))); if(q) list=list.filter(r=>[r.displayName,r.key,r.city,r.country,r.chain,r.brand,[...r.hotelNames].join(' ')].join(' ').toLowerCase().includes(q)); list.sort((a,b)=>{ let av=a[sortKey],bv=b[sortKey]; if(av instanceof Set)av=av.size;if(bv instanceof Set)bv=bv.size; if(typeof av==='string') return sortDir==='asc'?av.localeCompare(bv):bv.localeCompare(av); return sortDir==='asc'?(av||0)-(bv||0):(bv||0)-(av||0); }); return list; }
+function initData(rows){ rawRows=rows; processed=process(rows); $('uploadBox').classList.add('hidden'); $('dashboard').classList.remove('hidden'); buildControls(); render(); }
+function buildControls(){ $('tabs').innerHTML=views.map(([k,l])=>`<button class="tab ${k===activeView?'active':''}" data-view="${k}">${l}</button>`).join(''); document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{activeView=b.dataset.view;sortKey='opportunityScore';sortDir='desc';buildControls();render();}); fillSelect('countryFilter',processed.filters.countries,'All Countries'); fillSelect('cityFilter',processed.filters.cities,'All Cities'); fillSelect('starFilter',processed.filters.stars,'All Stars',v=>v==='All'?'All Stars':v+'★'); fillSelect('propertyFilter',processed.filters.props,'All Property Types'); fillSelect('supplierFilter',processed.filters.suppliers,'All Suppliers'); fillSelect('statusFilter',processed.filters.statuses,'All Booking Status'); fillSelect('projectionYear',processed.filters.years.length?processed.filters.years:[String(new Date().getFullYear())],'Projection Year'); if(processed.filters.years.length){ $('projectionYear').value=processed.filters.years[processed.filters.years.length-1]; }
+ /* v7: populate YoY year pickers */ const yrs=processed.filters.years.length?processed.filters.years:[String(new Date().getFullYear())]; fillSelect('yoyYear1',yrs,'Year 1'); fillSelect('yoyYear2',yrs,'Year 2'); if(yrs.length>=2){$('yoyYear1').value=yrs[yrs.length-2];$('yoyYear2').value=yrs[yrs.length-1];}else{$('yoyYear1').value=yrs[0];$('yoyYear2').value=yrs[0];}
+ ['countryFilter','cityFilter','starFilter','propertyFilter','supplierFilter','statusFilter','trendPeriod','trendMetric','projectionYear','projectionMetric','agencySort','supplierMixMetric','supplierMixTop','yoyYear1','yoyYear2','yoyMetric','ltMetric','scatterView'].forEach(id=>{if($(id))$(id).onchange=render;}); $('searchInput').oninput=render; }
+function fillSelect(id,arr,label,fn){ const cur=$(id).value||'All'; $(id).innerHTML=arr.map(v=>`<option value="${esc(v)}">${esc(fn?fn(v):(v==='All'?label:v))}</option>`).join(''); $(id).value=arr.includes(cur)?cur:(arr[0]||'All'); }
+function render(){
+  _cachedRows=null;
+  if(_renderTimer) clearTimeout(_renderTimer);
+  _renderTimer=setTimeout(()=>{
+    _cachedRows=filteredRows();
+    const list=filtered();
+    renderKpis(list,_cachedRows);
+    renderTable(list);
+    renderSide(list,_cachedRows);
+    requestAnimationFrame(()=>{
+      renderTrend(_cachedRows);
+      renderProjection(_cachedRows);
+      renderAgencyState(_cachedRows);
+      renderSupplierMix(_cachedRows);
+      renderYoY(_cachedRows);
+      renderLeadTime(_cachedRows);
+      renderScatter(_cachedRows);
+    });
+  },120);
+}
+function renderKpis(list,rows){ const rn=rows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0), bookings=rows.length; $('kpiGrid').innerHTML=[['Bookings',fmt(bookings),`${list.length} ${activeView} rows shown`],['Room Nights',fmt(rn),`${(rn/Math.max(1,bookings)).toFixed(1)} RN / booking`],['Unique Hotels',fmt(new Set(rows.map(r=>clean(r.hotel_id)||clean(r.hotel_name))).size),'after current filters'],['Suppliers',fmt(new Set(rows.map(r=>clean(r.name)||'Unknown')).size),'active supply sources'],['Refundable Mix',pct(bookings?rows.filter(r=>clean(r.isRefundable)==='1').length/bookings*100:0),'higher is better for CX'],['Date Range',processed.dateMin&&processed.dateMax?`${processed.dateMin} → ${processed.dateMax}`:'-',`${processed.totalBookings.toLocaleString('en-IN')} total rows loaded`]].map(x=>`<div class="card"><div class="kpiLabel">${x[0]}</div><div class="kpiVal">${x[1]}</div><div class="kpiSub">${x[2]}</div></div>`).join(''); }
+
+function rowsForItem(r){
+  const base=filteredRows();
+  return base.filter(row=>{
+    const chain=valid(row.ChainName)||'Independent';
+    const brand=valid(row.BrandName)||'Unbranded';
+    const hotel=clean(row.hotel_name)||'Unknown Hotel';
+    const hotelId=clean(row.hotel_id)||hotel;
+    const country=clean(row.country)||'Unknown';
+    const city=clean(row.city)||'Unknown';
+    const supplier=clean(row.name)||'Unknown';
+    if(r.type==='Chain') return chain===r.displayName;
+    if(r.type==='Brand') return brand===r.displayName;
+    if(r.type==='Hotel') return `${hotelId}|${hotel}`===r.key;
+    if(r.type==='Destination') return `${country}|${city}`===r.key;
+    if(r.type==='Supplier') return supplier===r.displayName;
+    return false;
+  });
+}
+function getRowDate(row){ return dateCol?clean(row[dateCol]||''):clean(row.booking_date||''); }
+function trendPoints(rows,period,metric){
+  const map={};
+  rows.forEach(r=>{
+    const rd=getRowDate(r);
+    let key=period==='yearly'?String(yearOf(rd)||'Unknown'):period==='quarterly'?quarterOf(rd):monthOf(rd);
+    if(!map[key])map[key]={key,bookings:0,roomNights:0,hotels:new Set()};
+    map[key].bookings++;
+    map[key].roomNights+=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1);
+    map[key].hotels.add(clean(r.hotel_id)||clean(r.hotel_name));
+  });
+  return Object.values(map).sort((a,b)=>a.key.localeCompare(b.key)).map(x=>({
+    ...x,
+    hotels:x.hotels.size,
+    los:x.bookings?x.roomNights/x.bookings:0,
+    value:metric==='bookings'?x.bookings:metric==='roomNights'?x.roomNights:metric==='hotels'?x.hotels:(x.bookings?x.roomNights/x.bookings:0)
+  }));
+}
+function lineSvgMarkup(data,w=900,h=320){
+  const p={l:55,r:22,t:22,b:46};
+  if(!data.length)return `<text x="40" y="140" class="axisText">No trend data available for this selection.</text>`;
+  const max=Math.max(...data.map(d=>d.value),1);
+  /* FIX v7: removed forced min:0 — start near actual min so variation is visible */
+  const rawMin=Math.min(...data.map(d=>d.value)); const padding=(max-rawMin)*0.08; const min=Math.max(0,rawMin-padding);
+  const span=Math.max(1,max-min);
+  const x=i=>p.l+(i/Math.max(1,data.length-1))*(w-p.l-p.r);
+  const y=v=>p.t+(1-(v-min)/span)*(h-p.t-p.b);
+  const path=data.map((d,i)=>(i?'L':'M')+x(i)+','+y(d.value)).join(' ');
+  let html='';
+  [0,.25,.5,.75,1].forEach(t=>{const val=min+t*span;html+=`<line class="gridLine" x1="${p.l}" x2="${w-p.r}" y1="${y(val)}" y2="${y(val)}"></line><text x="8" y="${y(val)+4}" class="axisText">${fmt(Math.round(val*10)/10)}</text>`});
+  html+=`<path class="linePath" d="${path}"></path>`;
+  data.forEach((d,i)=>{ if(data.length<=20 || i%Math.ceil(data.length/12)===0){ html+=`<circle class="dot" cx="${x(i)}" cy="${y(d.value)}" r="4"><title>${d.key}: ${Math.round(d.value*10)/10}</title></circle><text x="${x(i)}" y="${h-16}" text-anchor="middle" class="axisText">${esc(d.key)}</text>`; }});
+  return html;
+}
+function renderSvgTrendInto(svgId,subId,rows,period,metric){
+  const data=trendPoints(rows,period,metric);
+  const svg=$(svgId), w=900,h=320;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.innerHTML=lineSvgMarkup(data,w,h);
+  if(subId && $(subId)) $(subId).textContent=`${period} trend · ${metric==='bookings'?'Bookings':metric==='roomNights'?'Room Nights':metric==='hotels'?'Unique Hotels':'Avg LOS'} · ${data.length} points`;
+}
+function supplierDistribution(rows,metric){
+  const map={}; let total=0;
+  rows.forEach(r=>{const s=clean(r.name)||'Unknown'; const val=rowMetric(r,metric); total+=val; map[s]=(map[s]||0)+val;});
+  return {total, arr:Object.entries(map).sort((a,b)=>b[1]-a[1])};
+}
+function aggregateTrend(rows){ const period=$('trendPeriod').value, metric=$('trendMetric').value; return trendPoints(rows,period,metric); }
+function renderTrend(rows){ renderSvgTrendInto('trendSvg','trendSub',rows,$('trendPeriod').value,$('trendMetric').value); }
+function renderProjection(rows){ const y=Number($('projectionYear').value), metric=$('projectionMetric').value; const yearRows=rows.filter(r=>yearOf(getRowDate(r))===y).sort((a,b)=>(parseFlexDate(getRowDate(a))?.getTime()||0)-(parseFlexDate(getRowDate(b))?.getTime()||0)); const box=$('projectionBox'); if(!yearRows.length){ box.innerHTML=`No ${y} data found after filters. Select a year available in the uploaded data.`; return; } const actual=yearRows.reduce((s,r)=>s+(metric==='bookings'?1:nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1)),0); const minDate=getRowDate(yearRows[0]); const maxDate=getRowDate(yearRows[yearRows.length-1]); const observedDays=daysBetween(minDate,maxDate)+1; const diy=daysInYear(y); const projection=Math.round(actual/Math.max(1,observedDays)*diy); const daily=(actual/Math.max(1,observedDays)); const label=metric==='bookings'?'Bookings':'Room Nights'; const caveat=(y!==new Date().getFullYear())?`Note: projection is for ${y} using actual data window, not Jan 1.`:`Current calendar year projection.`; box.innerHTML=`<b>${label} Projection for ${y}: ${fmt(projection)}</b><br>${caveat}<div class="mathLine">Observed ${label} = ${fmt(actual)}<br>Data window = ${observedDays} days (${esc(minDate)} → ${esc(maxDate)})<br>Daily run-rate = ${fmt(actual)} ÷ ${observedDays} = ${daily.toFixed(2)} per day<br>Full-year projection = ${daily.toFixed(2)} × ${diy} = ${fmt(projection)}</div><div class="footerNote">Projection is a straight-line run-rate. It does not adjust for seasonality, campaigns, supplier changes, or destination mix shifts.</div>`; }
+function renderAgencyState(rows){ const map={}; rows.forEach(r=>{ const k=clean(r['Agency State'])||'Unknown'; if(!map[k])map[k]={state:k,bookings:0,roomNights:0,cities:new Set(),dest:{}}; const rn=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1); map[k].bookings++; map[k].roomNights+=rn; map[k].cities.add(clean(r['Agency City'])||'Unknown'); const dest=(clean(r.city)||'Unknown')+', '+(clean(r.country)||'Unknown'); map[k].dest[dest]=(map[k].dest[dest]||0)+1; }); const sort=$('agencySort').value; let arr=Object.values(map).map(x=>({...x,los:x.bookings?x.roomNights/x.bookings:0,topDest:Object.entries(x.dest).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-'})); arr.sort((a,b)=>(b[sort]||0)-(a[sort]||0)); const max=Math.max(1,...arr.map(x=>x.bookings)); $('agencyStateBox').innerHTML=`<div class="tableWrap" style="max-height:330px"><table class="smallTable"><thead><tr><th>Agency State</th><th>Bookings</th><th>Room Nights</th><th>Avg LOS</th><th>Agency Cities</th><th>Top Destination</th></tr></thead><tbody>${arr.slice(0,40).map(x=>`<tr><td><b>${esc(x.state)}</b><div class="bar" style="margin-top:5px"><i style="width:${Math.min(100,x.bookings/max*100)}%"></i></div></td><td>${fmt(x.bookings)}</td><td>${fmt(x.roomNights)}</td><td>${x.los.toFixed(1)}</td><td>${fmt(x.cities.size)}</td><td>${esc(x.topDest)}</td></tr>`).join('')}</tbody></table></div>`; }
+function renderSupplierMix(rows){ const metric=$('supplierMixMetric').value, top=Number($('supplierMixTop').value); const chainMap={}; rows.forEach(r=>{ const chain=valid(r.ChainName)||'Independent'; const supplier=clean(r.name)||'Unknown'; if(!chainMap[chain])chainMap[chain]={chain,total:0,sup:{}}; const val=rowMetric(r,metric); chainMap[chain].total+=val; chainMap[chain].sup[supplier]=(chainMap[chain].sup[supplier]||0)+val; }); const arr=Object.values(chainMap).sort((a,b)=>b.total-a.total).slice(0,top); const allSup=[...new Set(arr.flatMap(c=>Object.keys(c.sup)))].sort((a,b)=>{ const sa=arr.reduce((s,c)=>s+(c.sup[a]||0),0), sb=arr.reduce((s,c)=>s+(c.sup[b]||0),0); return sb-sa; }).slice(0,10); let html=''; arr.forEach(c=>{ const suppliers=Object.entries(c.sup).sort((a,b)=>b[1]-a[1]); let other=0, otherCount=0; html+=`<div class="supMixRow"><div><div class="barLabel">${esc(c.chain)}</div><div class="barMeta">${fmt(Math.round(c.total))} ${metric==='bookings'?'bookings':'units'}</div></div><div class="supMixHbar">`; suppliers.forEach(([s,v],i)=>{ const idx=allSup.indexOf(s); if(idx>=0){ const pc=v/Math.max(1,c.total)*100; html+=`<div class="seg" title="${esc(s)}: ${pct(pc)}" style="width:${pc}%;background:${palette[idx%palette.length]}"><span>${pc>=15?pct(pc):''}</span></div>`; } else {other+=v; otherCount++;} }); if(other>0){ const pc=other/Math.max(1,c.total)*100; html+=`<div class="seg" title="Other (${otherCount} supplier${otherCount>1?'s':''}): ${pct(pc)}" style="width:${pc}%;background:#8fa3bd"><span>${pc>=15?`Other (${otherCount})`:''}</span></div>`; } html+=`</div><div class="barValue">100%</div></div>`; }); html+=`<div class="legend">${allSup.map((s,i)=>`<div class="legendItem"><i class="swatch" style="background:${palette[i%palette.length]}"></i>${esc(s)}</div>`).join('')}<div class="legendItem"><i class="swatch" style="background:#8fa3bd"></i>Other suppliers</div></div>`; $('supplierMixBox').innerHTML=html || '<div class="note">No supplier mix data for selected filters.</div>'; }
+function columns(){ const base=[['displayName',activeView==='hotel'?'Hotel':activeView==='destination'?'Destination':activeView==='supplier'?'Supplier':activeView==='brand'?'Brand':'Chain'],['opportunityScore','Score'],['bookings','Bookings'],['roomNights','Room Nights'],['avgLOS','Avg LOS'],['monthSpread','Months'],['supplierCount','Suppliers'],['agencyCityCount','Agency Cities'],['refundableRate','Refundable %'],['avgStar','Avg Stars']]; if(activeView!=='hotel') base.splice(6,0,['hotelCount','Hotels']); if(activeView==='hotel') base.splice(1,0,['city','City'],['country','Country'],['chain','Chain']); return base; }
+function subtitle(r){ if(activeView==='hotel') return `${r.chain||'Independent'} · ${r.city||''}, ${r.country||''}`; if(activeView==='destination') return `${r.hotelCount} hotels · ${r.supplierCount} suppliers`; if(activeView==='supplier') return `${r.hotelCount} hotels · ${r.cityCount} cities`; return `${r.hotelCount} hotels · ${r.cityCount} cities · ${r.supplierCount} suppliers`; }
+function renderTable(list){ $('tableTitle').textContent=`${views.find(v=>v[0]===activeView)[1]} · Contracting Priority`; $('tableSub').textContent=`Showing ${list.length.toLocaleString('en-IN')} rows, sorted by ${sortKey} ${sortDir}`; $('rowLimitNote').textContent=list.length>500?`Showing first 500 of ${fmt(list.length)}`:''; $('empty').classList.toggle('hidden',list.length>0); const cols=columns(); const head='<thead><tr>'+cols.map(([k,l])=>`<th data-sort="${k}" style="${k==='displayName'||k==='city'||k==='country'||k==='chain'?'text-align:left':''}">${l} ${sortKey===k?(sortDir==='asc'?'▲':'▼'):''}</th>`).join('')+'</tr></thead>'; const body='<tbody>'+list.slice(0,500).map((r,i)=>'<tr data-idx="'+i+'">'+cols.map(([k,l],ci)=>cell(r,k,ci)).join('')+'</tr>').join('')+'</tbody>'; $('mainTable').innerHTML=head+body; document.querySelectorAll('th[data-sort]').forEach(th=>th.onclick=()=>{ const k=th.dataset.sort; if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc'; else{sortKey=k;sortDir='desc'} render();}); document.querySelectorAll('#mainTable tbody tr').forEach((tr,i)=>tr.onclick=()=>openDetail(list[i])); }
+function cell(r,k,ci){ let v=r[k]; if(k==='displayName') return `<td class="nameCell"><div class="mainName">${esc(r.displayName)}</div><div class="subName">${esc(subtitle(r))}</div></td>`; if(k==='opportunityScore') return `<td><div class="score"><div class="bar"><i style="width:${Math.min(100,r.opportunityScore)}%"></i></div><b>${r.opportunityScore}</b></div></td>`; if(k==='refundableRate') return `<td><span class="pill ${r.refundableRate>=60?'green':r.refundableRate>=25?'yellow':'red'}">${r.refundableRate}%</span></td>`; if(k==='avgStar') return `<td><span class="stars">${'★'.repeat(Math.round(r.avgStar)||0)}${'☆'.repeat(Math.max(0,5-(Math.round(r.avgStar)||0)))}</span></td>`; if(k==='avgLOS') return `<td>${Number(v||0).toFixed(1)}</td>`; if(['bookings','roomNights','hotelCount','supplierCount','monthSpread','agencyCityCount'].includes(k)) return `<td>${fmt(v)}</td>`; return `<td style="${ci===0||['city','country','chain'].includes(k)?'text-align:left':''}">${esc(v)}</td>`; }
+function renderSide(list,rows){ $('topOpp').innerHTML=list.slice(0,8).map((r,i)=>`<div class="rankItem"><div class="rankNo">${i+1}</div><div><div class="rankName">${esc(r.displayName)}</div><div class="rankMeta">${fmt(r.bookings)} bookings · ${fmt(r.roomNights)} RN · ${r.refundableRate}% refundable</div></div><div class="rankVal">${r.opportunityScore}</div></div>`).join('')||'<div class="note">No rows.</div>'; const missingChain=rawRows.filter(r=>!valid(r.ChainName)).length, missingBrand=rawRows.filter(r=>!valid(r.BrandName)).length, missingStar=rawRows.filter(r=>!clean(r['Star Rating'])).length, missingStatus=statusCol?rawRows.filter(r=>!clean(r[statusCol])).length:rawRows.length; $('qualityBox').innerHTML=[['Missing Chain',missingChain],['Missing Brand',missingBrand],['Missing Star',missingStar],['Missing Status',missingStatus]].map(x=>`<div class="q"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join(''); $('statusNote').innerHTML=statusCol?`Booking status filter is using column: <b>${esc(statusCol)}</b>.`:`No booking-status column found in this file. Add a column like <b>booking_status</b> or <b>Booking Status</b> to use live status filtering.`; }
+
+function yearsFromRows(rows){
+  const ys=[...new Set(rows.map(r=>yearOf(getRowDate(r))).filter(Boolean).map(String))].sort();
+  return ys.length?ys:[String(new Date().getFullYear())];
+}
+function metricLabel(metric){ return metric==='bookings'?'Bookings':metric==='roomNights'?'Room Nights':'Avg LOS'; }
+function actualForMetric(rows,metric){
+  if(metric==='bookings') return rows.length;
+  if(metric==='roomNights') return rows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0);
+  const bookings=rows.length;
+  const rn=rows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0);
+  return bookings?rn/bookings:0;
+}
+function renderProjectionInto(boxId, rows, year, metric, scopeName){
+  const y=Number(year), box=$(boxId);
+  const yearRows=rows.filter(r=>yearOf(getRowDate(r))===y).sort((a,b)=>(parseFlexDate(getRowDate(a))?.getTime()||0)-(parseFlexDate(getRowDate(b))?.getTime()||0));
+  if(!yearRows.length){ box.innerHTML=`No ${y} data found for this ${esc(scopeName)} after current filters.`; return; }
+  const minDate=getRowDate(yearRows[0]), maxDate=getRowDate(yearRows[yearRows.length-1]);
+  const observedDays=daysBetween(minDate, maxDate)+1, diy=daysInYear(y);
+  const label=metricLabel(metric);
+  const actual=actualForMetric(yearRows, metric);
+  const daily=actual/Math.max(1, observedDays);
+  const projection=metric==='los' ? actual : Math.round(daily*diy);
+  const displayProj=metric==='los' ? Number(projection).toFixed(1) : fmt(projection);
+  const actualDisplay=metric==='los' ? Number(actual).toFixed(1) : fmt(Math.round(actual));
+  if(metric==='los'){
+    box.innerHTML=`<b>${label} for ${y}: ${displayProj}</b><br><span class="note">LOS is an average metric, so we show observed average instead of annualizing it.</span><div class="mathLine">Room nights = ${fmt(yearRows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0))}<br>Bookings = ${fmt(yearRows.length)}<br>Avg LOS = Room nights ÷ Bookings = ${displayProj}</div>`;
+  } else {
+    box.innerHTML=`<b>${label} Projection for ${y}: ${displayProj}</b><br><span class="note">Projection is calculated only for the selected ${esc(scopeName)} and current filters.</span><div class="mathLine">Observed ${label} = ${actualDisplay}<br>Data window = ${observedDays} days (${esc(minDate)} → ${esc(maxDate)})<br>Daily run-rate = ${actualDisplay} ÷ ${observedDays} = ${daily.toFixed(2)} per day<br>Full-year projection = ${daily.toFixed(2)} × ${diy} = ${displayProj}</div><div class="footerNote">Straight-line run-rate only. It does not adjust for seasonality, campaigns, supplier changes, or destination mix shifts.</div>`;
+  }
+}
+function hotelDistribution(rows){
+  const map={};
+  rows.forEach(r=>{
+    const hotel=clean(r.hotel_name)||'Unknown Hotel', hotelId=clean(r.hotel_id)||hotel, key=hotelId+'|'+hotel;
+    if(!map[key]) map[key]={hotelId,hotel,city:clean(r.city)||'Unknown',country:clean(r.country)||'Unknown',chain:valid(r.ChainName)||'Independent',brand:valid(r.BrandName)||'Unbranded',bookings:0,roomNights:0,suppliers:new Set(),months:new Set(),refundable:0,stars:[]};
+    const m=map[key];
+    m.bookings++;
+    m.roomNights+=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1);
+    m.suppliers.add(clean(r.name)||'Unknown');
+    m.months.add(monthOf(getRowDate(r)));
+    m.stars.push(toNum(r['Star Rating'],0));
+    if(clean(r.isRefundable)==='1')m.refundable++;
+  });
+  return Object.values(map).map(m=>({
+    ...m,
+    avgLOS:m.bookings?m.roomNights/m.bookings:0,
+    refundableRate:m.bookings?Math.round(m.refundable/m.bookings*100):0,
+    supplierCount:m.suppliers.size,
+    monthSpread:m.months.size,
+    avgStar:m.stars.length?m.stars.reduce((a,b)=>a+b,0)/m.stars.length:0
+  })).sort((a,b)=>b.roomNights-a.roomNights || b.bookings-a.bookings);
+}
+
+function agencyStateDistribution(rows,metric){
+  const map={}; let total=0;
+  rows.forEach(r=>{
+    const state=clean(r['Agency State'])||'Unknown';
+    const city=clean(r['Agency City'])||'Unknown';
+    const destCity=clean(r.city)||'Unknown';
+    const destCountry=clean(r.country)||'Unknown';
+    if(!map[state]) map[state]={state,bookings:0,roomNights:0,agencyCities:new Set(),destinations:{},suppliers:new Set(),hotels:new Set()};
+    const m=map[state];
+    const rn=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1);
+    m.bookings++;
+    m.roomNights+=rn;
+    m.agencyCities.add(city);
+    m.suppliers.add(clean(r.name)||'Unknown');
+    m.hotels.add(clean(r.hotel_id)||clean(r.hotel_name)||'Unknown');
+    const dest=destCity+', '+destCountry;
+    m.destinations[dest]=(m.destinations[dest]||0)+1;
+  });
+  const arr=Object.values(map).map(x=>{
+    const topDest=Object.entries(x.destinations).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-';
+    const value=metric==='roomNights'?x.roomNights:metric==='los'?(x.bookings?x.roomNights/x.bookings:0):x.bookings;
+    return {...x,avgLOS:x.bookings?x.roomNights/x.bookings:0,topDest,value};
+  }).sort((a,b)=>b.value-a.value || b.bookings-a.bookings);
+  total=arr.reduce((s,x)=>s+(metric==='roomNights'?x.roomNights:metric==='los'?x.avgLOS:x.bookings),0);
+  return {arr,total};
+}
+function renderDetailAgencyState(){
+  if(!currentDetailItem || !$('detailAgencyStateBox'))return;
+  const rows=rowsForItem(currentDetailItem);
+  const metric=$('detailAgencyMetric') ? $('detailAgencyMetric').value : 'bookings';
+  const {arr,total}=agencyStateDistribution(rows,metric);
+  if(!arr.length){ $('detailAgencyStateBox').innerHTML='<div class="note">No agency-state data available for this selection.</div>'; return; }
+  const basisLabel=metric==='roomNights'?'room nights':metric==='los'?'avg LOS':'bookings';
+  const max=Math.max(1,...arr.map(x=>x.value));
+  const top=arr[0];
+  const shareMetric = metric==='los' ? top.bookings/Math.max(1,rows.length)*100 : top.value/Math.max(1,total)*100;
+  const summary=`<div class="mathBox" style="margin-bottom:12px"><b>Highest demand region: ${esc(top.state)}</b><br>${esc(top.state)} contributes ${fmt(top.bookings)} bookings, ${fmt(top.roomNights)} room nights and ${top.avgLOS.toFixed(1)} avg LOS for this selected ${esc((currentDetailItem.type||activeView).toLowerCase())}. ${metric==='los'?'For LOS sorting, share shown below is booking share.':'This is '+pct(shareMetric)+' of selected '+basisLabel+'.'}</div>`;
+  const bars=arr.slice(0,12).map((x,i)=>{
+    const pc=metric==='los' ? x.bookings/Math.max(1,rows.length)*100 : x.value/Math.max(1,total)*100;
+    const width=x.value/max*100;
+    return `<div class="barRow" title="${esc(x.state)}"><div><div class="barLabel">${i+1}. ${esc(x.state)}</div><div class="barMeta">${fmt(x.bookings)} bookings · ${fmt(x.roomNights)} RN · ${x.avgLOS.toFixed(1)} LOS</div></div><div class="hbar"><div class="seg" style="width:${Math.max(2,width)}%;background:${palette[i%palette.length]}"><span>${width>=12?pct(pc):''}</span></div></div><div class="barValue">${metric==='los'?x.avgLOS.toFixed(1):pct(pc)}</div></div>`;
+  }).join('');
+  const table=`<div class="tableWrap" style="max-height:360px;margin-top:14px"><table class="smallTable"><thead><tr><th>Agency State</th><th>Share</th><th>Bookings</th><th>Room Nights</th><th>Avg LOS</th><th>Agency Cities</th><th>Suppliers</th><th>Top Destination</th></tr></thead><tbody>${arr.slice(0,50).map(x=>{const pc=metric==='los'?x.bookings/Math.max(1,rows.length)*100:x.value/Math.max(1,total)*100;return `<tr><td><b>${esc(x.state)}</b></td><td>${metric==='los'?pct(x.bookings/Math.max(1,rows.length)*100):pct(pc)}</td><td>${fmt(x.bookings)}</td><td>${fmt(x.roomNights)}</td><td>${x.avgLOS.toFixed(1)}</td><td>${fmt(x.agencyCities.size)}</td><td>${fmt(x.suppliers.size)}</td><td>${esc(x.topDest)}</td></tr>`}).join('')}</tbody></table></div>`;
+  $('detailAgencyStateBox').innerHTML=summary+bars+table;
+  if($('detailAgencySub')) $('detailAgencySub').textContent=`Demand distribution by Indian agency state for the selected ${esc((currentDetailItem.type||activeView).toLowerCase())}; sorted by ${basisLabel}.`;
+}
+function renderDetailHotelList(){
+  if(!currentDetailItem || !$('detailHotelListBox'))return;
+  const rows=rowsForItem(currentDetailItem);
+  const sort=$('detailHotelSort') ? $('detailHotelSort').value : 'roomNights';
+  const hotels=hotelDistribution(rows).sort((a,b)=>(b[sort]||0)-(a[sort]||0)).slice(0,100);
+  if(!hotels.length){ $('detailHotelListBox').innerHTML='<div class="note">No hotel-level data available for this selection.</div>'; return; }
+  $('detailHotelListBox').innerHTML=`<div class="tableWrap" style="max-height:440px"><table class="smallTable"><thead><tr><th>Hotel</th><th>City</th><th>Bookings</th><th>Room Nights</th><th>Avg LOS</th><th>Months</th><th>Suppliers</th><th>Refundable %</th></tr></thead><tbody>${hotels.map(h=>`<tr><td><b>${esc(h.hotel)}</b><div class="subName">${esc(h.chain)}${h.brand && h.brand!=='Unbranded'?' · '+esc(h.brand):''}</div></td><td>${esc(h.city)}, ${esc(h.country)}</td><td>${fmt(h.bookings)}</td><td>${fmt(h.roomNights)}</td><td>${h.avgLOS.toFixed(1)}</td><td>${fmt(h.monthSpread)}</td><td>${fmt(h.supplierCount)}</td><td><span class="pill ${h.refundableRate>=60?'green':h.refundableRate>=25?'yellow':'red'}">${h.refundableRate}%</span></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function dateObj(v){ return parseFlexDate(v); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function monthKeyFromDate(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1); }
+function periodKeyFromDate(d,period){ if(period==='yearly') return String(d.getFullYear()); if(period==='quarterly') return d.getFullYear()+'-Q'+(Math.floor(d.getMonth()/3)+1); return monthKeyFromDate(d); }
+function periodBoundsFromKey(key,period){
+  if(period==='yearly'){ const y=Number(key); return {start:new Date(y,0,1), end:new Date(y,11,31)}; }
+  if(period==='quarterly'){ const [y,q]=key.split('-Q').map(Number); const m=(q-1)*3; return {start:new Date(y,m,1), end:new Date(y,m+3,0)}; }
+  const [y,m]=key.split('-').map(Number); return {start:new Date(y,m-1,1), end:new Date(y,m,0)};
+}
+function fullPeriodRows(rows,dateField='booking_date',period='monthly'){
+  const dated=rows.map(r=>({r,d:dateObj(r[dateField])})).filter(x=>x.d);
+  if(!dated.length) return [];
+  const minD=new Date(Math.min(...dated.map(x=>x.d.getTime()))), maxD=new Date(Math.max(...dated.map(x=>x.d.getTime())));
+  return dated.filter(({d})=>{ const b=periodBoundsFromKey(periodKeyFromDate(d,period),period); return b.start>=new Date(minD.getFullYear(),minD.getMonth(),minD.getDate()) && b.end<=new Date(maxD.getFullYear(),maxD.getMonth(),maxD.getDate()); }).map(x=>x.r);
+}
+function trendPointsFor(rows,period,metric,dateField='booking_date',excludeIncomplete=true){
+  const source=excludeIncomplete?fullPeriodRows(rows,dateField,period):rows;
+  const map={};
+  source.forEach(r=>{ const d=dateObj(r[dateField]); if(!d)return; const key=periodKeyFromDate(d,period); if(!map[key])map[key]={key,bookings:0,roomNights:0,hotels:new Set()}; map[key].bookings++; map[key].roomNights+=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1); map[key].hotels.add(clean(r.hotel_id)||clean(r.hotel_name)); });
+  return Object.values(map).sort((a,b)=>a.key.localeCompare(b.key)).map(x=>({...x,hotels:x.hotels.size,los:x.bookings?x.roomNights/x.bookings:0,value:metric==='bookings'?x.bookings:metric==='roomNights'?x.roomNights:metric==='hotels'?x.hotels:(x.bookings?x.roomNights/x.bookings:0)}));
+}
+function renderSvgTrendData(svgId,subId,data,label,period,excludeNote){
+  const svg=$(svgId); if(!svg)return;
+  const w=960,h=360,pad={l:58,r:24,t:26,b:46};
+  if(!data.length){ svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.innerHTML=`<text x="40" y="150" class="axisText">No complete ${period} periods available for this selection.</text>`; if(subId&&$(subId))$(subId).textContent='No complete periods available after excluding incomplete periods.'; return; }
+  const max=Math.max(1,...data.map(d=>d.value)); const min=Math.min(0,...data.map(d=>d.value));
+  const x=i=>pad.l+(data.length===1?0:(i/(data.length-1)))*(w-pad.l-pad.r); const y=v=>h-pad.b-((v-min)/(max-min||1))*(h-pad.t-pad.b);
+  const pts=data.map((d,i)=>[x(i),y(d.value)]); const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const ticks=5; let grid=''; for(let i=0;i<=ticks;i++){ const val=min+(max-min)*i/ticks, yy=y(val); grid+=`<line x1="${pad.l}" x2="${w-pad.r}" y1="${yy}" y2="${yy}" class="gridLine"/><text x="${pad.l-10}" y="${yy+4}" text-anchor="end" class="axisText">${fmt(Math.round(val))}</text>`; }
+  const labelEvery=Math.max(1,Math.ceil(data.length/8)); const labels=data.map((d,i)=>i%labelEvery===0?`<text x="${x(i)}" y="${h-16}" text-anchor="middle" class="axisText">${esc(d.key)}</text>`:'').join('');
+  const dots=pts.map((p,i)=>`<circle class="dot" cx="${p[0]}" cy="${p[1]}" r="4"><title>${esc(data[i].key)}: ${Number(data[i].value).toFixed(label==='Avg LOS'?1:0)}</title></circle>`).join('');
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.innerHTML=grid+`<path d="${path}" class="linePath"/>`+dots+labels;
+  if(subId&&$(subId))$(subId).textContent=`${period} trend · ${label} · ${data.length} complete points${excludeNote?' · incomplete first/last period removed':''}`;
+}
+function renderDetailTrend(){
+  if(!currentDetailItem)return;
+  const rows=rowsForItem(currentDetailItem), period=$('detailTrendPeriod').value, metric=$('detailTrendMetric').value;
+  const label=metric==='bookings'?'Bookings':metric==='roomNights'?'Room Nights':metric==='hotels'?'Unique Hotels':'Avg LOS';
+  const df=dateCol||'booking_date';
+  const data=trendPointsFor(rows,period,metric,df,true);
+  renderSvgTrendData('detailTrendSvg','detailTrendSub',data,label,period,true);
+  renderTrendScoreCards(rows,data);
+  renderMealPlanSplit(rows);
+}
+function renderTrendScoreCards(rows,data){
+  if(!$('detailTrendKpis'))return;
+  const df=dateCol||'booking_date';
+  const fullRows=fullPeriodRows(rows,df,$('detailTrendPeriod').value);
+  const bookings=fullRows.length, rn=fullRows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0);
+  const latest=data[data.length-1], prev=data[data.length-2];
+  const mom=(latest&&prev&&prev.value)?((latest.value-prev.value)/prev.value*100):null;
+  $('detailTrendKpis').innerHTML=[['Complete-period bookings',fmt(bookings)],['Complete-period RN',fmt(rn)],['Avg LOS',bookings?(rn/bookings).toFixed(1):'0.0'],['Trend points',fmt(data.length)],['Latest point',latest?fmt(Math.round(latest.value)):'-'],['vs previous',mom===null?'-':pct(mom)]].map(x=>`<div class="miniMetric"><span class="kpiLabel">${x[0]}</span><b>${x[1]}</b></div>`).join('');
+}
+function renderMealPlanSplit(rows){
+  if(!$('detailMealPlanBox'))return;
+  const map={}; rows.forEach(r=>{ const b=boardType(r); map[b]=(map[b]||0)+1; });
+  const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,8); const total=rows.length||1;
+  $('detailMealPlanBox').innerHTML=arr.map(([k,v],i)=>`<div class="detailBarRow"><div class="barLabel">${esc(k)}</div><div class="hbar"><div class="seg" style="width:${v/total*100}%;background:${palette[i%palette.length]}"><span>${v/total*100>=10?pct(v/total*100):''}</span></div></div><div class="barValue">${pct(v/total*100)}</div></div>`).join('') || '<div class="note">No meal plan data available.</div>';
+}
+function seasonalityData(rows,dateField,metric){
+  const full=fullPeriodRows(rows,dateField,'monthly');
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const map=monthNames.map((m,i)=>({idx:i,name:m,totalBookings:0,totalRoomNights:0,periods:new Set()}));
+  full.forEach(r=>{ const d=dateObj(r[dateField]); if(!d)return; const m=map[d.getMonth()]; const key=monthKeyFromDate(d); m.totalBookings++; m.totalRoomNights+=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1); m.periods.add(key); });
+  return map.map(m=>{ const n=Math.max(1,m.periods.size); const avgBookings=m.totalBookings/n, avgRN=m.totalRoomNights/n, avgLOS=m.totalBookings?m.totalRoomNights/m.totalBookings:0; const value=metric==='roomNights'?avgRN:metric==='los'?avgLOS:avgBookings; return {...m,avgBookings,avgRN,avgLOS,value}; });
+}
+function renderSeasonality(){
+  if(!$('seasonalityBox')||!currentDetailItem)return;
+  const rows=rowsForItem(currentDetailItem), basis=$('seasonalityBasis').value, metric=$('seasonalityMetric').value;
+  const dateField=basis==='travel'?'checkIn':(dateCol||'booking_date'); const data=seasonalityData(rows,dateField,metric);
+  const label=metric==='roomNights'?'Avg monthly room nights':metric==='los'?'Avg LOS':'Avg monthly bookings';
+  const max=Math.max(1,...data.map(x=>x.value)); const top=[...data].sort((a,b)=>b.value-a.value)[0];
+  const bars=data.map((m,i)=>`<div class="seasonMonth"><div class="barLabel">${m.name}</div><div class="hbar"><div class="seg" style="width:${Math.max(2,m.value/max*100)}%;background:${palette[i%palette.length]}"><span>${m.value/max*100>=12?(metric==='los'?m.value.toFixed(1):fmt(Math.round(m.value))):''}</span></div></div><div class="barValue">${metric==='los'?m.value.toFixed(1):fmt(Math.round(m.value))}</div></div>`).join('');
+  const table=`<div class="tableWrap" style="max-height:360px"><table class="smallTable"><thead><tr><th>Month</th><th>Avg Bookings</th><th>Avg RN</th><th>Avg LOS</th><th>Month Samples</th></tr></thead><tbody>${data.map(m=>`<tr><td><b>${m.name}</b></td><td>${fmt(Math.round(m.avgBookings))}</td><td>${fmt(Math.round(m.avgRN))}</td><td>${m.avgLOS.toFixed(1)}</td><td>${m.periods.size}</td></tr>`).join('')}</tbody></table></div>`;
+  $('seasonalityBox').innerHTML=`<div class="seasonGrid"><div class="card"><div class="sectionTitle">${basis==='travel'?'Travel':'Booking'} Seasonality · ${esc(label)}</div><div class="mathBox" style="margin-bottom:12px"><b>Peak month: ${top.name}</b><br>Based on ${basis==='travel'?'check-in month':'booking creation month'} and complete calendar months only. Each month shows average monthly demand across available complete month samples, so Jan with multiple years is normalized.</div>${bars}</div><div class="card"><div class="sectionTitle">Seasonality Maths</div><div class="mathLine">For each completed calendar month:<br>1. Aggregate ${basis==='travel'?'travel/check-in':'booking'} demand by month of year<br>2. For each month, divide total by number of completed month samples<br>3. Seasonality value = ${metric==='bookings'?'average monthly bookings':metric==='roomNights'?'average monthly room nights':'room nights ÷ bookings'}</div>${table}</div></div>`;
+}
+function switchDetailSection(section){
+  document.querySelectorAll('.detailTab').forEach(b=>b.classList.toggle('active',b.dataset.section===section));
+  document.querySelectorAll('.detailPane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+section));
+}
+function openDetail(r){
+  currentDetailItem=r;
+  $('detailOverlay').classList.remove('hidden');
+  $('detail').classList.add('open');
+  const itemRows=rowsForItem(r);
+  const suppliers=[...r.suppliers].slice(0,16);
+  const cities=[...r.cities].slice(0,16);
+  const years=yearsFromRows(itemRows);
+  const why=[];
+  if(r.bookings>0)why.push(`${fmt(r.bookings)} bookings and ${fmt(r.roomNights)} room nights prove demand.`);
+  if(r.monthSpread>1)why.push(`Demand appears across ${r.monthSpread} months, reducing one-off noise.`);
+  if(r.supplierCount>1)why.push(`${r.supplierCount} suppliers are fulfilling this demand, so direct contracting may reduce fragmentation.`);
+  if(r.refundableRate<40)why.push(`Refundable mix is only ${r.refundableRate}%, so refundable inventory/rate negotiation can improve CX.`);
+  const trendTitle = r.type==='Hotel' ? 'Hotel Trend' : `${r.type} Trend`;
+  $('detail').innerHTML=`
+    <div class="detailHead">
+      <div>
+        <div class="eyebrow">${esc(r.type||activeView)} Detail Workspace</div>
+        <div class="detailTitle">${esc(r.displayName)}</div>
+        <div class="subName">${esc(subtitle(r))} · ${fmt(itemRows.length)} filtered booking rows</div>
+      </div>
+      <button class="btn detailClose" onclick="closeDetail()">← Back</button>
+    </div>
+    <div class="detailBody">
+      <div class="detailNav">
+        <button class="detailTab active" data-section="trend">Trend</button>
+        <button class="detailTab" data-section="supplier">Supplier Distribution</button>
+        <button class="detailTab" data-section="agent">Agent Distribution</button>
+        <button class="detailTab" data-section="hotels">Hotel Level Data</button>
+        <button class="detailTab" data-section="seasonality">Seasonality</button>
+      </div>
+
+      <section class="detailPane active" id="pane-trend">
+        <div class="scoreStrip" id="detailTrendKpis"></div>
+        <div class="detailMainGrid">
+          <div class="card wideCard">
+            <div class="chartHeader">
+              <div><div class="chartTitle">${esc(trendTitle)}</div><div class="chartSub" id="detailTrendSub">Trend excludes incomplete first/last periods so partial-month drops do not mislead.</div></div>
+              <div class="miniControls"><select id="detailTrendPeriod"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select><select id="detailTrendMetric"><option value="bookings">Bookings</option><option value="roomNights">Room Nights</option><option value="los">Avg LOS</option><option value="hotels">Unique Hotels</option></select></div>
+            </div>
+            <div class="bigChartBox"><svg id="detailTrendSvg" class="svgChart"></svg></div>
+          </div>
+          <div class="card wideCard compactCard">
+            <div class="sectionTitle">${esc(r.type||activeView)} Level Projection</div>
+            <div class="chartHeader" style="margin-bottom:10px">
+              <div class="detailSectionIntro">Projection is calculated for this exact selected ${esc((r.type||activeView).toLowerCase())}, after current filters.</div>
+              <div class="miniControls"><select id="detailProjectionYear">${years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join('')}</select><select id="detailProjectionMetric"><option value="bookings">Bookings</option><option value="roomNights">Room Nights</option><option value="los">Avg LOS</option></select></div>
+            </div>
+            <div id="detailProjectionBox" class="mathBox"></div>
+            <div class="section" style="margin-top:18px"><div class="sectionTitle">Why this is a contracting opportunity</div><div class="mathBox">${why.map(x=>'• '+esc(x)).join('<br>')}</div></div>
+            <div class="section" style="margin-top:18px"><div class="sectionTitle">Meal Plan / Board Basis Split</div><div id="detailMealPlanBox"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="detailPane" id="pane-supplier">
+        <div class="card">
+          <div class="chartHeader">
+            <div><div class="chartTitle">Supplier Mix ${r.type==='Chain'?'for this Chain':'for this Selection'}</div><div class="chartSub" id="detailSupplierSub">Horizontal stacked graph. Percentages are based on selected metric.</div></div>
+            <div class="miniControls"><select id="detailSupplierMetric"><option value="bookings">% of Bookings</option><option value="roomNights">% of Room Nights</option><option value="losWeighted">% of LOS-weighted Volume</option></select></div>
+          </div>
+          <div id="detailSupplierBox"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="sectionTitle">Coverage</div>
+          <div class="detailSectionIntro">Quick view of suppliers and geographies involved in this selection.</div>
+          <div class="section"><div class="sectionTitle">Suppliers</div><div class="chips">${suppliers.map(s=>`<span class="chip">${esc(s)}</span>`).join('')}</div></div>
+          <div class="section"><div class="sectionTitle">Cities</div><div class="chips">${cities.map(s=>`<span class="chip">${esc(s)}</span>`).join('')}</div></div>
+        </div>
+      </section>
+
+      <section class="detailPane" id="pane-agent">
+        <div class="card">
+          <div class="chartHeader">
+            <div><div class="chartTitle">Agency State Demand Split</div><div class="chartSub" id="detailAgencySub">Shows which Indian agency regions are booking this selected ${esc((r.type||activeView).toLowerCase())} the most.</div></div>
+            <div class="miniControls"><select id="detailAgencyMetric"><option value="bookings">% of Bookings</option><option value="roomNights">% of Room Nights</option><option value="los">Sort by Avg LOS</option></select></div>
+          </div>
+          <div id="detailAgencyStateBox"></div>
+        </div>
+      </section>
+
+      <section class="detailPane" id="pane-hotels">
+        <div class="card">
+          <div class="chartHeader">
+            <div><div class="chartTitle">Hotel-wise List inside this ${esc(r.type||activeView)}</div><div class="chartSub">Hotels contributing to this selected ${esc((r.type||activeView).toLowerCase())}, sorted by the selected metric.</div></div>
+            <div class="miniControls"><select id="detailHotelSort"><option value="roomNights">Sort by Room Nights</option><option value="bookings">Sort by Bookings</option><option value="avgLOS">Sort by Avg LOS</option><option value="supplierCount">Sort by Suppliers</option><option value="monthSpread">Sort by Months Active</option><option value="refundableRate">Sort by Refundable %</option></select></div>
+          </div>
+          <div id="detailHotelListBox"></div>
+        </div>
+      </section>
+
+      <section class="detailPane" id="pane-seasonality">
+        <div class="card">
+          <div class="chartHeader">
+            <div><div class="chartTitle">Seasonality</div><div class="chartSub">Switch between booking seasonality and travel seasonality. Travel seasonality uses check-in date; booking seasonality uses booking creation date.</div></div>
+            <div class="miniControls"><select id="seasonalityBasis"><option value="booking">Booking Seasonality</option><option value="travel">Travel Seasonality</option></select><select id="seasonalityMetric"><option value="bookings">Bookings</option><option value="roomNights">Room Nights</option><option value="los">Avg LOS</option></select></div>
+          </div>
+          <div id="seasonalityBox"></div>
+        </div>
+      </section>
+    </div>`;
+  document.querySelectorAll('.detailTab').forEach(btn=>btn.onclick=()=>switchDetailSection(btn.dataset.section));
+  $('detailTrendPeriod').onchange=renderDetailAnalytics;
+  $('detailTrendMetric').onchange=renderDetailAnalytics;
+  $('detailSupplierMetric').onchange=renderDetailAnalytics;
+  $('detailProjectionYear').value=years[years.length-1];
+  $('detailProjectionYear').onchange=renderDetailAnalytics;
+  $('detailProjectionMetric').onchange=renderDetailAnalytics;
+  $('detailHotelSort').onchange=renderDetailHotelList;
+  $('detailAgencyMetric').onchange=renderDetailAgencyState;
+  $('seasonalityBasis').onchange=renderSeasonality;
+  $('seasonalityMetric').onchange=renderSeasonality;
+  renderDetailAnalytics();
+}
+function renderDetailAnalytics(){
+  if(!currentDetailItem)return;
+  const rows=rowsForItem(currentDetailItem);
+  renderDetailTrend();
+  renderProjectionInto('detailProjectionBox', rows, $('detailProjectionYear').value, $('detailProjectionMetric').value, (currentDetailItem.type||activeView).toLowerCase());
+  const metric=$('detailSupplierMetric').value;
+  const {total,arr}=supplierDistribution(rows,metric);
+  if(!arr.length){$('detailSupplierBox').innerHTML='<div class="note">No supplier data available.</div>';}
+  else{
+    let stack='<div class="supplierStackBig">';
+    let rowsHtml='';
+    arr.forEach(([s,v],i)=>{ const pc=v/Math.max(1,total)*100; stack+=`<div class="seg" title="${esc(s)}: ${pct(pc)}" style="width:${pc}%;background:${palette[i%palette.length]}"><span>${pc>=7?pct(pc):''}</span></div>`; rowsHtml+=`<tr><td><span class="swatch" style="display:inline-block;background:${palette[i%palette.length]};vertical-align:middle;margin-right:7px"></span><b>${esc(s)}</b></td><td>${fmt(Math.round(v))}</td><td>${pct(pc)}</td></tr>`; });
+    stack+='</div>';
+    $('detailSupplierBox').innerHTML=`${stack}<div class="supplierTable"><table class="smallTable"><thead><tr><th>Supplier</th><th>${metric==='bookings'?'Bookings':'Units'}</th><th>Share</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
+    $('detailSupplierSub').textContent=`${fmt(Math.round(total))} total ${metric==='bookings'?'bookings':'units'} across ${arr.length} suppliers.`;
+  }
+  renderDetailAgencyState();
+  renderDetailHotelList();
+  renderSeasonality();
+}
+/* ========== v7 NEW VISUALIZATIONS ========== */
+
+/* ---- YoY Comparison Chart ---- */
+function yoyMonthlyPoints(rows, year, metric){
+  const months=['01','02','03','04','05','06','07','08','09','10','11','12'];
+  const map={};
+  rows.filter(r=>yearOf(getRowDate(r))===year).forEach(r=>{
+    const dt=parseFlexDate(getRowDate(r));
+    if(!dt) return;
+    const m=pad2(dt.getMonth()+1);
+    if(!map[m]) map[m]={bookings:0,roomNights:0};
+    map[m].bookings++;
+    map[m].roomNights+=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1);
+  });
+  return months.map(m=>({
+    month:m,
+    value: metric==='bookings'?(map[m]?.bookings||0):metric==='roomNights'?(map[m]?.roomNights||0):(map[m]&&map[m].bookings?(map[m].roomNights/map[m].bookings):0)
+  }));
+}
+function renderYoY(rows){
+  const svg=$('yoySvg'); if(!svg)return;
+  const years=processed.filters.years;
+  if(years.length<1){svg.innerHTML='<text x="40" y="140" class="axisText">Need at least 1 year of data.</text>';return;}
+  const y1=Number($('yoyYear1').value), y2=Number($('yoyYear2').value);
+  const metric=$('yoyMetric').value;
+  const d1=yoyMonthlyPoints(rows,y1,metric), d2=yoyMonthlyPoints(rows,y2,metric);
+  const allVals=[...d1.map(x=>x.value),...d2.map(x=>x.value)].filter(v=>v>0);
+  if(!allVals.length){svg.innerHTML='<text x="40" y="140" class="axisText">No data for selected years.</text>';return;}
+  const w=900,h=280,pad={l:58,r:24,t:22,b:44};
+  const maxV=Math.max(...allVals), rawMin=Math.min(...allVals), minV=Math.max(0,rawMin-((maxV-rawMin)*0.1));
+  const monthLabels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const xi=i=>pad.l+(i/11)*(w-pad.l-pad.r);
+  const yv=v=>h-pad.b-((v-minV)/Math.max(1,maxV-minV))*(h-pad.t-pad.b);
+  let html='';
+  [0,.25,.5,.75,1].forEach(t=>{ const val=minV+t*(maxV-minV); const yy=yv(val); html+=`<line x1="${pad.l}" x2="${w-pad.r}" y1="${yy}" y2="${yy}" class="gridLine"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" class="axisText">${fmt(Math.round(val))}</text>`; });
+  monthLabels.forEach((m,i)=>{ html+=`<text x="${xi(i)}" y="${h-10}" text-anchor="middle" class="axisText">${m}</text>`; });
+  const mkPath=(data,cls)=>data.map((d,i)=>(i?'L':'M')+xi(i).toFixed(1)+' '+yv(d.value).toFixed(1)).join(' ');
+  html+=`<path d="${mkPath(d1)}" class="${'yoyLine1'}"/><path d="${mkPath(d2)}" class="${'yoyLine2'}"/>`;
+  d1.forEach((d,i)=>{ if(d.value>0) html+=`<circle class="yoyDot1" cx="${xi(i)}" cy="${yv(d.value)}" r="4"><title>${monthLabels[i]} ${y1}: ${metric==='los'?d.value.toFixed(1):fmt(Math.round(d.value))}</title></circle>`; });
+  d2.forEach((d,i)=>{ if(d.value>0) html+=`<circle class="yoyDot2" cx="${xi(i)}" cy="${yv(d.value)}" r="4"><title>${monthLabels[i]} ${y2}: ${metric==='los'?d.value.toFixed(1):fmt(Math.round(d.value))}</title></circle>`; });
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.innerHTML=html;
+  const leg=$('yoyLegend'); if(leg) leg.innerHTML=`<div class="legendItem"><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#27d6c4" stroke-width="2.5"/></svg>${y1}</div><div class="legendItem"><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#ffd23f" stroke-width="2.5" stroke-dasharray="6 3"/></svg>${y2}</div>`;
+  const sub=$('yoySub'); if(sub){ const metricL=metric==='bookings'?'Bookings':metric==='roomNights'?'Room Nights':'Avg LOS'; sub.textContent=`Monthly ${metricL} · ${y1} vs ${y2} · hover dots for values`; }
+}
+
+/* ---- Lead Time Distribution ---- */
+function leadTimeBuckets(){ return [{label:'Same day',min:0,max:0},{label:'1–7 days',min:1,max:7},{label:'8–30 days',min:8,max:30},{label:'31–90 days',min:31,max:90},{label:'91–180 days',min:91,max:180},{label:'181+ days',min:181,max:Infinity}]; }
+function renderLeadTime(rows){
+  const box=$('leadTimeBox'); if(!box)return;
+  const metric=$('ltMetric').value;
+  const buckets=leadTimeBuckets().map(b=>({...b,bookings:0,roomNights:0}));
+  rows.forEach(r=>{
+    const bd=parseFlexDate(getRowDate(r)), ci=parseFlexDate(r.checkIn);
+    if(isNaN(bd)||isNaN(ci)) return;
+    const lt=Math.round((ci-bd)/86400000);
+    if(lt<0) return;
+    const rn=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1);
+    const b=buckets.find(b=>lt>=b.min&&lt<=b.max);
+    if(b){b.bookings++;b.roomNights+=rn;}
+  });
+  const total=buckets.reduce((s,b)=>s+(metric==='roomNights'?b.roomNights:b.bookings),0);
+  if(!total){ box.innerHTML='<div class="note">No valid booking/check-in date pairs found. Ensure your date and checkIn columns are present.</div>'; return; }
+  const max=Math.max(1,...buckets.map(b=>metric==='roomNights'?b.roomNights:b.bookings));
+  const implTip=['Last-minute / dynamic pricing window','Short-window — flexible rates work','Mid-advance — standard allotment','Core advance purchase zone','Long lead — early bird / package rates','Ultra-advance — annual contract territory'];
+  box.innerHTML=buckets.map((b,i)=>{
+    const val=metric==='roomNights'?b.roomNights:b.bookings;
+    const share=val/total*100;
+    const barW=val/max*100;
+    return `<div class="ltBucket"><div><div class="ltLabel">${esc(b.label)}</div><div class="ltMeta">${esc(implTip[i])}</div></div><div class="hbar"><div class="seg" style="width:${Math.max(2,barW)}%;background:${palette[i%palette.length]}"><span>${barW>=12?pct(share):''}</span></div></div><div style="text-align:right;font-size:11px;color:var(--muted)">${pct(share)}</div><div style="text-align:right;font-size:11px">${fmt(val)}</div></div>`;
+  }).join('')+`<div class="footerNote">Lead time = check-in date minus booking date. Negative lead times excluded. ${fmt(rows.filter(r=>{const b=parseFlexDate(getRowDate(r)),c=parseFlexDate(r.checkIn);return b&&c&&Math.round((c-b)/86400000)<0}).length)} rows excluded.</div>`;
+}
+
+/* ---- Supplier Concentration Scatter ---- */
+function renderScatter(rows){
+  const svg=$('scatterSvg'); if(!svg)return;
+  const view=$('scatterView').value;
+  const map={};
+  rows.forEach(r=>{
+    let key, label;
+    if(view==='chain'){key=label=valid(r.ChainName)||'Independent';}
+    else if(view==='brand'){key=label=valid(r.BrandName)||'Unbranded';}
+    else{const co=clean(r.country)||'Unknown', ci=clean(r.city)||'Unknown'; key=`${co}|${ci}`; label=`${ci}, ${co}`;}
+    if(!map[key]) map[key]={label,bookings:0,roomNights:0,suppliers:new Set()};
+    map[key].bookings++;
+    map[key].roomNights+=nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1);
+    map[key].suppliers.add(clean(r.name)||'Unknown');
+  });
+  const pts=Object.values(map).map(m=>({...m,supplierCount:m.suppliers.size})).filter(p=>p.bookings>0);
+  if(pts.length<2){svg.innerHTML='<text x="40" y="160" class="axisText">Not enough data points for scatter. Need at least 2 groups.</text>';return;}
+  const w=960,h=340,pad={l:60,r:24,t:24,b:50};
+  const maxB=Math.max(...pts.map(p=>p.bookings)), maxS=Math.max(...pts.map(p=>p.supplierCount)), maxRN=Math.max(1,...pts.map(p=>p.roomNights));
+  const xi=v=>pad.l+(v/Math.max(1,maxB))*(w-pad.l-pad.r);
+  const yi=v=>h-pad.b-((v-1)/Math.max(1,maxS-1))*(h-pad.t-pad.b);
+  const dotR=p=>4+Math.round((p.roomNights/maxRN)*18);
+  let html='';
+  // Grid lines
+  for(let i=0;i<=4;i++){
+    const xv=i/4*maxB; const xx=xi(xv);
+    html+=`<line x1="${xx}" x2="${xx}" y1="${pad.t}" y2="${h-pad.b}" class="gridLine"/><text x="${xx}" y="${h-pad.b+16}" text-anchor="middle" class="axisText">${fmt(Math.round(xv))}</text>`;
+  }
+  for(let i=1;i<=maxS;i++){
+    const yy=yi(i);
+    if(i===1||i===maxS||i%Math.ceil(maxS/4)===0) html+=`<line x1="${pad.l}" x2="${w-pad.r}" y1="${yy}" y2="${yy}" class="gridLine"/><text x="${pad.l-8}" y="${yy+4}" text-anchor="end" class="axisText">${i}</text>`;
+  }
+  // Axis labels
+  html+=`<text x="${(pad.l+w-pad.r)/2}" y="${h-2}" text-anchor="middle" class="axisText" style="font-size:11px;fill:#cfe0f5">Total Bookings →</text>`;
+  html+=`<text x="14" y="${(pad.t+h-pad.b)/2}" text-anchor="middle" transform="rotate(-90,14,${(pad.t+h-pad.b)/2})" class="axisText" style="font-size:11px;fill:#cfe0f5">Supplier Count →</text>`;
+  // Quadrant shading
+  const midX=xi(maxB/2), midY=yi(maxS/2);
+  html+=`<rect x="${midX}" y="${pad.t}" width="${w-pad.r-midX}" height="${midY-pad.t}" fill="rgba(255,93,115,.04)" rx="4"/>`;
+  html+=`<text x="${(midX+w-pad.r)/2}" y="${pad.t+14}" text-anchor="middle" style="fill:#ff5d73;font-size:10px;font-weight:900;opacity:.7">HIGH VOLUME · MANY SUPPLIERS → Priority consolidation</text>`;
+  // Dots
+  pts.sort((a,b)=>b.roomNights-a.roomNights).forEach((p,i)=>{
+    const cx=xi(p.bookings), cy=yi(p.supplierCount), r=dotR(p);
+    const col=palette[i%palette.length];
+    html+=`<circle class="scatterDot" cx="${cx}" cy="${cy}" r="${r}" fill="${col}" fill-opacity=".75" stroke="${col}" stroke-width="1"><title>${esc(p.label)}\nBookings: ${fmt(p.bookings)}\nRoom Nights: ${fmt(p.roomNights)}\nSuppliers: ${p.supplierCount}</title></circle>`;
+    if(p.bookings>maxB*0.15||p.supplierCount===maxS||i<4){
+      html+=`<text x="${cx}" y="${cy-r-3}" text-anchor="middle" class="axisText" style="font-size:9px;fill:#cfe0f5">${esc(p.label.length>18?p.label.slice(0,16)+'…':p.label)}</text>`;
+    }
+  });
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.innerHTML=html;
+}
+
+/* ========== end v7 NEW VISUALIZATIONS ========== */
+
+function closeDetail(){ currentDetailItem=null; $('detailOverlay').classList.add('hidden'); $('detail').classList.remove('open'); }
+$('detailOverlay').onclick=closeDetail;
+$('uploadBtn').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=e=>{ const f=e.target.files[0]; if(!f)return; const reader=new FileReader(); reader.onload=ev=>initData(parseData(ev.target.result)); reader.readAsText(f); };
+$('pasteBtn').onclick=()=>{$('pasteArea').classList.remove('hidden');$('pasteActions').classList.remove('hidden');};
+$('cancelPasteBtn').onclick=()=>{$('pasteArea').classList.add('hidden');$('pasteActions').classList.add('hidden');};
+$('loadPastedBtn').onclick=()=>initData(parseData($('pasteArea').value));
+$('resetBtn').onclick=()=>location.reload();
+$('exportBtn').onclick=()=>{ if(!processed)return; const list=filtered(); const cols=columns().map(c=>c[0]); const csv=[cols.join(',')].concat(list.map(r=>cols.map(c=>'"'+String(r[c] instanceof Set?r[c].size:r[c]??'').replace(/"/g,'""')+'"').join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='hotel_contracting_current_view.csv'; a.click(); URL.revokeObjectURL(a.href); };
+</script>
+</body>
+</html>
