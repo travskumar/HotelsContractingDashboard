@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hotel Contracting Intelligence Dashboard v7</title>
+  <title>Hotel Contracting Intelligence Dashboard</title>
   <style>
     :root{
       --bg:#07111f; --panel:#0d1b2e; --panel2:#10233a; --card:#0f243b; --muted:#8fa3bd; --text:#edf5ff;
@@ -48,9 +48,9 @@
 <div class="wrap">
   <div class="header">
     <div>
-      <div class="eyebrow">TravClan Hotels · Contracting Intelligence v7</div>
+      <div class="eyebrow">TravClan Hotels · Contracting Intelligence</div>
       <h1 class="title">Find where demand is strong enough to negotiate.</h1>
-      <div class="subtitle">Upload booking-level hotel data and rank chains, brands, hotels, destinations and suppliers. v7 adds YoY comparison chart, lead-time distribution, supplier concentration scatter, fixed projection denominator (data start → max, not Jan 1), relative-score note, and clearer supplier fragmentation labelling.</div>
+      <div class="subtitle">Upload booking-level hotel data and rank chains, brands, hotels, destinations and suppliers.  adds YoY comparison chart, lead-time distribution, supplier concentration scatter, fixed projection denominator (data start → max, not Jan 1), relative-score note, and clearer supplier fragmentation labelling.</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
       <button class="btn" id="resetBtn">Reset</button>
@@ -140,7 +140,7 @@
       </div>
     </div>
 
-    <!-- NEW v7: YoY Comparison + Lead Time Distribution -->
+    <!-- NEW : YoY Comparison + Lead Time Distribution -->
     <div class="analyticsGrid" style="margin-top:14px">
       <div class="card">
         <div class="chartHeader">
@@ -163,7 +163,7 @@
       </div>
     </div>
 
-    <!-- NEW v7: Supplier Concentration Scatter -->
+    <!-- NEW : Supplier Concentration Scatter -->
     <div class="card" style="margin:14px 0">
       <div class="chartHeader">
         <div><div class="chartTitle">Supplier Concentration Scatter</div><div class="chartSub">X = Total Bookings · Y = Number of Suppliers · Dot size = Room Nights. Top-right quadrant (high volume, many suppliers) = urgent consolidation opportunity. Hover for details.</div></div>
@@ -215,7 +215,41 @@ const yearOf=d=>{const dt=parseFlexDate(d);return dt&&Number.isFinite(dt.getFull
 const quarterOf=d=>{const dt=parseFlexDate(d);if(!dt)return 'Unknown';return dt.getFullYear()+'-Q'+(Math.floor(dt.getMonth()/3)+1)};
 const daysInYear=y=>((y%4===0&&y%100!==0)||y%400===0)?366:365;
 const valid=v=>{v=clean(v);return v && v!=='0' && v.toLowerCase()!=='independent'?v:''};
-const palette=['#2f80ed','#27d6c4','#ffd23f','#ff9f1c','#9d7cff','#38d39f','#ff5d73','#80a6ff','#c0f255','#ffb7d5','#60e6ff','#f8e16c'];
+
+/* Shared junk detector — rejects values that are clearly corrupted/overflow data.
+   Used across all filter dropdowns: country, city, star, property type, supplier. */
+const isJunk=v=>{
+  if(!v||v.length<1) return true;
+  if(/^\w+:\S/.test(v)) return true;           // key:value blobs  e.g. estimatedValue:7904
+  if(/T\d{2}:\d{2}:\d{2}/.test(v)) return true; // ISO datetime blobs e.g. start:2024-03-11T23:59:00
+  if(/\d{4}-\d{2}-\d{2}T/.test(v)) return true; // ISO date-time fragment
+  if((v.match(/,/g)||[]).length>=2) return true;  // serialised row fragments with 2+ commas
+  if(/^(phone|email|null|undefined|true|false|nan|#n\/a)$/i.test(v)) return true;
+  return false;
+};
+const isValidGeoName=v=>{
+  if(!v||v.length<2) return false;
+  if(isJunk(v)) return false;
+  if(/^[\d\s.,+-]+$/.test(v)) return false;     // purely numeric
+  return true;
+};
+const isValidStar=v=>{
+  if(!v) return false;
+  if(isJunk(v)) return false;
+  const n=Number(v);
+  return (Number.isFinite(n)&&n>=0&&n<=10) || v==='Unknown';
+};
+const isValidPropType=v=>{
+  if(!v||v.length<2) return false;
+  if(isJunk(v)) return false;
+  if(/^[\d\s.,+-]+$/.test(v)) return false;
+  return true;
+};
+const isValidSupplier=v=>{
+  if(!v||v.length<1) return false;
+  if(isJunk(v)) return false;
+  return true;
+};const palette=['#2f80ed','#27d6c4','#ffd23f','#ff9f1c','#9d7cff','#38d39f','#ff5d73','#80a6ff','#c0f255','#ffb7d5','#60e6ff','#f8e16c'];
 const statusCandidates=['booking_status','Booking Status','status','Status','bookingStatus','BookingStatus','booking_state','Booking State','bookingStatusName','Booking Status Name'];
 const dateCandidates=['booking_date','Booking Date','bookingDate','BookingDate','booking_dt','created_at','CreatedAt'];
 let rawRows=[],processed=null,activeView='chain',sortKey='opportunityScore',sortDir='desc',statusCol=null,dateCol=null,currentDetailItem=null;
@@ -224,7 +258,7 @@ const views=[['chain','By Chain'],['brand','By Brand'],['hotel','By Hotel'],['de
 
 function splitLine(line,delim){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; } else if(ch===delim&&!q){ out.push(cur);cur=''; } else cur+=ch; } out.push(cur); return out; }
 function detectDelim(text){ const first=(text.split(/\r?\n/).find(l=>l.trim())||''); const tabs=(first.match(/\t/g)||[]).length, commas=(first.match(/,/g)||[]).length; return tabs>=commas?'\t':','; }
-function parseData(text){ const delim=detectDelim(text); const lines=text.split(/\r?\n/).filter(l=>l.trim()); if(!lines.length)return[]; const rawHeaders=splitLine(lines[0],delim).map(h=>clean(h)); return lines.slice(1).map(line=>{ const vals=splitLine(line,delim); const o={}; rawHeaders.forEach((h,i)=>{ o[h]=clean(vals[i]); }); return o; }).filter(o=>Object.values(o).some(Boolean)); }
+function parseData(text){ const delim=detectDelim(text); const lines=text.split(/\r?\n/).filter(l=>l.trim()); if(!lines.length)return[]; const rawHeaders=splitLine(lines[0],delim).map(h=>clean(h)); const hLen=rawHeaders.length; return lines.slice(1).map(line=>{ const vals=splitLine(line,delim); const o={}; rawHeaders.forEach((h,i)=>{ if(i<hLen) o[h]=clean(vals[i]); }); return o; }).filter(o=>Object.values(o).some(Boolean)); }
 function boardType(row){ try{ const b=JSON.parse(row.boardBasis||'{}'); return clean(b.type||b.description||'RoomOnly')||'RoomOnly'; }catch(e){ return clean(row.boardBasis)||'RoomOnly'; } }
 function getStatus(row){ return statusCol ? clean(row[statusCol]) || 'Blank Status' : 'No Status Column'; }
 function rowMetric(row,metric){ const rn=nights(row.checkIn,row.checkOut)*(parseInt(row.numberOfRoom)||1); if(metric==='bookings')return 1; if(metric==='roomNights')return rn; if(metric==='losWeighted')return rn; return 1; }
@@ -238,7 +272,13 @@ function process(rows){ statusCol=null; dateCol=null; const headers=Object.keys(
  const getDate=row=>clean(row[dateCol]||'');
  const isRealDate=v=>{ if(!v||String(v).length<6)return false; const d=parseFlexDate(v); return d&&!isNaN(d.getTime())&&d.getFullYear()>2000&&d.getFullYear()<2100; };
  const maps={chain:{},brand:{},hotel:{},destination:{},supplier:{}}; const sets={countries:new Set(),cities:new Set(),stars:new Set(),props:new Set(),suppliers:new Set(),statuses:new Set(),years:new Set()};
- rows.forEach(row=>{ const chain=valid(row.ChainName)||'Independent', brand=valid(row.BrandName)||'Unbranded', hotel=clean(row.hotel_name)||'Unknown Hotel', hotelId=clean(row.hotel_id)||hotel, country=clean(row.country)||'Unknown', city=clean(row.city)||'Unknown', star=clean(row['Star Rating'])||'Unknown', prop=clean(row.PropertyType)||'Unknown', supplier=clean(row.name)||'Unknown', status=getStatus(row), y=yearOf(getDate(row)); sets.countries.add(country); sets.cities.add(city); sets.stars.add(star); sets.props.add(prop); sets.suppliers.add(supplier); sets.statuses.add(status); if(y)sets.years.add(String(y)); add(maps.chain,chain,row,{displayName:chain,type:'Chain'},getDate); add(maps.brand,brand,row,{displayName:brand,type:'Brand'},getDate); add(maps.hotel,`${hotelId}|${hotel}`,row,{displayName:hotel,type:'Hotel',hotelId,city,country,star,chain,brand},getDate); add(maps.destination,`${country}|${city}`,row,{displayName:`${city}, ${country}`,type:'Destination',city,country},getDate); add(maps.supplier,supplier,row,{displayName:supplier,type:'Supplier'},getDate); });
+ rows.forEach(row=>{ const chain=valid(row.ChainName)||'Independent', brand=valid(row.BrandName)||'Unbranded', hotel=clean(row.hotel_name)||'Unknown Hotel', hotelId=clean(row.hotel_id)||hotel, country=clean(row.country)||'Unknown', city=clean(row.city)||'Unknown', star=clean(row['Star Rating'])||'Unknown', prop=clean(row.PropertyType)||'Unknown', supplier=clean(row.name)||'Unknown', status=getStatus(row), y=yearOf(getDate(row));
+   if(isValidGeoName(country)) sets.countries.add(country);
+   if(isValidGeoName(city)) sets.cities.add(city);
+   if(isValidStar(star)) sets.stars.add(star);
+   if(isValidPropType(prop)) sets.props.add(prop);
+   if(isValidSupplier(supplier)) sets.suppliers.add(supplier);
+   sets.statuses.add(status); if(y)sets.years.add(String(y)); add(maps.chain,chain,row,{displayName:chain,type:'Chain'},getDate); add(maps.brand,brand,row,{displayName:brand,type:'Brand'},getDate); add(maps.hotel,`${hotelId}|${hotel}`,row,{displayName:hotel,type:'Hotel',hotelId,city,country,star,chain,brand},getDate); add(maps.destination,`${country}|${city}`,row,{displayName:`${city}, ${country}`,type:'Destination',city,country},getDate); add(maps.supplier,supplier,row,{displayName:supplier,type:'Supplier'},getDate); });
  const out={}; Object.keys(maps).forEach(k=>out[k]=finalize(Object.values(maps[k]))); out.filters={countries:['All',...Array.from(sets.countries).sort()],cities:['All',...Array.from(sets.cities).sort()],stars:['All',...Array.from(sets.stars).sort((a,b)=>toNum(a)-toNum(b))],props:['All',...Array.from(sets.props).sort()],suppliers:['All',...Array.from(sets.suppliers).sort()],statuses:['All',...Array.from(sets.statuses).sort()],years:Array.from(sets.years).sort()}; out.totalBookings=rows.length; out.totalRoomNights=rows.reduce((s,r)=>s+nights(r.checkIn,r.checkOut)*(parseInt(r.numberOfRoom)||1),0); out.uniqueHotels=new Set(rows.map(r=>clean(r.hotel_id)||clean(r.hotel_name))).size; out.uniqueChains=out.chain.length; out.uniqueCities=sets.cities.size; out.refRate=Math.round(rows.filter(r=>clean(r.isRefundable)==='1').length/Math.max(1,rows.length)*100);
  const ds=rows.map(r=>({raw:getDate(r),ts:parseFlexDate(getDate(r))?.getTime()||0})).filter(x=>isRealDate(x.raw)).sort((a,b)=>a.ts-b.ts);
  out.dateMin=ds.length?dateToISO(new Date(ds[0].ts)):''; out.dateMax=ds.length?dateToISO(new Date(ds[ds.length-1].ts)):''; out.dateCol=dateCol; return out; }
@@ -248,7 +288,7 @@ function filteredRowsCached(){ if(_cachedRows)return _cachedRows; _cachedRows=fi
 function filtered(){ let list=[...processed[activeView]]; const cf=$('countryFilter').value, city=$('cityFilter').value, sf=$('starFilter').value, pf=$('propertyFilter').value, sup=$('supplierFilter').value, st=$('statusFilter').value, q=$('searchInput').value.toLowerCase().trim(); list=list.filter(r=>(cf==='All'||r.countries.has(cf)||r.country===cf)&&(city==='All'||r.cities.has(city)||r.city===city)&&(sf==='All'||String(Math.round(r.avgStar))===String(sf)||String(r.star)===String(sf))&&(pf==='All'||r.propertyTypes.has(pf))&&(sup==='All'||r.suppliers.has(sup)||r.displayName===sup)&&(st==='All'||r.statusSet.has(st))); if(q) list=list.filter(r=>[r.displayName,r.key,r.city,r.country,r.chain,r.brand,[...r.hotelNames].join(' ')].join(' ').toLowerCase().includes(q)); list.sort((a,b)=>{ let av=a[sortKey],bv=b[sortKey]; if(av instanceof Set)av=av.size;if(bv instanceof Set)bv=bv.size; if(typeof av==='string') return sortDir==='asc'?av.localeCompare(bv):bv.localeCompare(av); return sortDir==='asc'?(av||0)-(bv||0):(bv||0)-(av||0); }); return list; }
 function initData(rows){ rawRows=rows; processed=process(rows); $('uploadBox').classList.add('hidden'); $('dashboard').classList.remove('hidden'); buildControls(); render(); }
 function buildControls(){ $('tabs').innerHTML=views.map(([k,l])=>`<button class="tab ${k===activeView?'active':''}" data-view="${k}">${l}</button>`).join(''); document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{activeView=b.dataset.view;sortKey='opportunityScore';sortDir='desc';buildControls();render();}); fillSelect('countryFilter',processed.filters.countries,'All Countries'); fillSelect('cityFilter',processed.filters.cities,'All Cities'); fillSelect('starFilter',processed.filters.stars,'All Stars',v=>v==='All'?'All Stars':v+'★'); fillSelect('propertyFilter',processed.filters.props,'All Property Types'); fillSelect('supplierFilter',processed.filters.suppliers,'All Suppliers'); fillSelect('statusFilter',processed.filters.statuses,'All Booking Status'); fillSelect('projectionYear',processed.filters.years.length?processed.filters.years:[String(new Date().getFullYear())],'Projection Year'); if(processed.filters.years.length){ $('projectionYear').value=processed.filters.years[processed.filters.years.length-1]; }
- /* v7: populate YoY year pickers */ const yrs=processed.filters.years.length?processed.filters.years:[String(new Date().getFullYear())]; fillSelect('yoyYear1',yrs,'Year 1'); fillSelect('yoyYear2',yrs,'Year 2'); if(yrs.length>=2){$('yoyYear1').value=yrs[yrs.length-2];$('yoyYear2').value=yrs[yrs.length-1];}else{$('yoyYear1').value=yrs[0];$('yoyYear2').value=yrs[0];}
+ /* : populate YoY year pickers */ const yrs=processed.filters.years.length?processed.filters.years:[String(new Date().getFullYear())]; fillSelect('yoyYear1',yrs,'Year 1'); fillSelect('yoyYear2',yrs,'Year 2'); if(yrs.length>=2){$('yoyYear1').value=yrs[yrs.length-2];$('yoyYear2').value=yrs[yrs.length-1];}else{$('yoyYear1').value=yrs[0];$('yoyYear2').value=yrs[0];}
  ['countryFilter','cityFilter','starFilter','propertyFilter','supplierFilter','statusFilter','trendPeriod','trendMetric','projectionYear','projectionMetric','agencySort','supplierMixMetric','supplierMixTop','yoyYear1','yoyYear2','yoyMetric','ltMetric','scatterView'].forEach(id=>{if($(id))$(id).onchange=render;}); $('searchInput').oninput=render; }
 function fillSelect(id,arr,label,fn){ const cur=$(id).value||'All'; $(id).innerHTML=arr.map(v=>`<option value="${esc(v)}">${esc(fn?fn(v):(v==='All'?label:v))}</option>`).join(''); $(id).value=arr.includes(cur)?cur:(arr[0]||'All'); }
 function render(){
@@ -313,7 +353,7 @@ function lineSvgMarkup(data,w=900,h=320){
   const p={l:55,r:22,t:22,b:46};
   if(!data.length)return `<text x="40" y="140" class="axisText">No trend data available for this selection.</text>`;
   const max=Math.max(...data.map(d=>d.value),1);
-  /* FIX v7: removed forced min:0 — start near actual min so variation is visible */
+  /* FIX : removed forced min:0 — start near actual min so variation is visible */
   const rawMin=Math.min(...data.map(d=>d.value)); const padding=(max-rawMin)*0.08; const min=Math.max(0,rawMin-padding);
   const span=Math.max(1,max-min);
   const x=i=>p.l+(i/Math.max(1,data.length-1))*(w-p.l-p.r);
@@ -670,7 +710,7 @@ function renderDetailAnalytics(){
   renderDetailHotelList();
   renderSeasonality();
 }
-/* ========== v7 NEW VISUALIZATIONS ========== */
+/* ==========  NEW VISUALIZATIONS ========== */
 
 /* ---- YoY Comparison Chart ---- */
 function yoyMonthlyPoints(rows, year, metric){
@@ -795,7 +835,7 @@ function renderScatter(rows){
   svg.innerHTML=html;
 }
 
-/* ========== end v7 NEW VISUALIZATIONS ========== */
+/* ========== end  NEW VISUALIZATIONS ========== */
 
 function closeDetail(){ currentDetailItem=null; $('detailOverlay').classList.add('hidden'); $('detail').classList.remove('open'); }
 $('detailOverlay').onclick=closeDetail;
